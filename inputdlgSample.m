@@ -3,8 +3,7 @@ function Answer=inputdlg(Prompt, Title, NumLines, DefAns, Resize)
     %  ANSWER = INPUTDLG(PROMPT) creates a modal dialog box that returns user
     %  input for multiple prompts in the cell array ANSWER. PROMPT is a cell
     %  array containing the PROMPT strings.
-    % Let me add some thing here to test git working
-    
+    %
     %  INPUTDLG uses UIWAIT to suspend execution until the user responds.
     %
     %  ANSWER = INPUTDLG(PROMPT,NAME) specifies the title for the dialog.
