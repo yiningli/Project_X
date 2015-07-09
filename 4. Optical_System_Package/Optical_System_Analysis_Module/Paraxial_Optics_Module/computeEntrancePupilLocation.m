@@ -27,13 +27,13 @@ function [ pupilPosition ] = computeEntrancePupilLocation...
     % corresponding ray parameter at object surface.
     ystop = 0;
     ustop = 0.01;
-    initialSurf = optSystem.getStopSurfaceIndex;
+    initialSurf = getStopSurfaceIndex(optSystem);
     finalSurf = 1;
-    wavlenInM = optSystem.getPrimaryWavelength;
+    wavlenInM = getPrimaryWavelength(optSystem);
     [ yobj,uobj ] = paraxialRayTracer( optSystem,ystop,ustop,initialSurf,finalSurf,wavlenInM);
     % Then entrance pupil position is where this object ray crosses the
     % optical axis
-    nonDummySurfaceArray = optSystem.getNonDummySurfaceArray;
+    nonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
     if abs(nonDummySurfaceArray(1).Thickness) > 10^10
         objThick = 0;
     else

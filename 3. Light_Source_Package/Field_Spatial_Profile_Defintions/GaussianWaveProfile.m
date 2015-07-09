@@ -24,7 +24,14 @@ function [ returnData1, returnData2, returnData3] = GaussianWaveProfile(...
         case 1 % Return the field names and initial values of spatialProfileParameters
             returnData1 = {'Type','Order','CentralWavelength','WaistRadius','WaistDistance'};
             returnData2 = {{'HermiteGaussianMode','LaguerreGaussianMode'},{'numeric','numeric'},{'numeric'},{'numeric','numeric'},{'numeric','numeric'}};
-            returnData3 = {{'HermiteGaussianMode'},[0;0],[0],[0;0],[0;0]};
+            
+            spatialProfileParametersStruct = struct();
+            spatialProfileParametersStruct.Type = 'HermiteGaussianMode';
+            spatialProfileParametersStruct.Order = [0;0];
+            spatialProfileParametersStruct.CentralWavelength = 550*10^-9;
+            spatialProfileParametersStruct.WaistRadius = [10^-3;10^-3];
+            spatialProfileParametersStruct.WaistDistance = [0;0];
+            returnData3 = spatialProfileParametersStruct;
         case 2 % Return the spatial profile
             
             % NB. The formula of ideal gaussian wave from VirtualLab are used

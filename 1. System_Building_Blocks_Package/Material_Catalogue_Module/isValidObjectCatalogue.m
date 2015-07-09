@@ -60,8 +60,7 @@ function [ valid, fileInfoStruct, dispMsg,relatedCatalogueFullFileNames] = isVal
                 dispMsg = 'Error: Invalid Object Catalogue File';
                 return
             else
-                if (strcmpi(fileInfo.Type,objectType)&&...
-                        strcmpi(class(objectArray),objectType))
+                if (strcmpi(fileInfo.Type,objectType))%&& strcmpi(class(objectArray),objectType))
                     valid = 1;
                     fileInfoStruct = fileInfo;
                     dispMsg = 'Success: Object Catalogue File is Valid.';

@@ -30,7 +30,7 @@ function updateSurfaceOrComponentEditorPanel( parentWindow , selectedIndex)
     elseif IsComponentBased(currentOpticalSystem)
         
         %Component List Data
-        nComponent = currentOpticalSystem.getNumberOfComponents;
+        nComponent = getNumberOfComponents(currentOpticalSystem);
         nSurface = getNumberOfSurfaces(currentOpticalSystem);
         componentArray = currentOpticalSystem.ComponentArray;
         % Read the componets and fill table for Component List
@@ -46,7 +46,7 @@ function updateSurfaceOrComponentEditorPanel( parentWindow , selectedIndex)
         
         stopComponent = currentOpticalSystem.ComponentArray(stopCompIndex);
         stopSurfaceInComponentIndex = stopComponent.StopSurfaceIndex;
-        nSurfaceInComponent = getNumberOfSurfaces(stopComponent);
+        nSurfaceInComponent = getComponentNumberOfSurfaces(stopComponent);
         
         set(aodHandles.popStopSurfaceInComponentIndex,'String',num2cell([1:nSurfaceInComponent]));
         set(aodHandles.popStopSurfaceInComponentIndex,'Value',stopSurfaceInComponentIndex);

@@ -50,7 +50,7 @@ function updatedSurfaceArray = updateSurfaceCoordinateTransformationMatrices(sur
         if prevThickness > 10^10 % Replace Inf with INF_OBJ_Z = 0 for object distance
             prevThickness = 0;
         end
-        [surfaceCoordinateTM,referenceCoordinateTM] = currentSurface.TiltAndDecenter(prevRefCoordinateTM,...
+        [surfaceCoordinateTM,referenceCoordinateTM] = TiltAndDecenter(currentSurface,prevRefCoordinateTM,...
             prevSurfCoordinateTM,prevThickness);
         % set surface property
         currentSurface.SurfaceCoordinateTM = surfaceCoordinateTM;

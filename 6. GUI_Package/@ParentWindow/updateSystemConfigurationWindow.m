@@ -70,8 +70,8 @@ function updateSystemConfigurationWindow( parentWindow )
     set(aodHandles.popSystemDefinitionType,'Value',systemDefinitionTypeIndex);
     
     %wavelength data
-    set(aodHandles.txtTotalWavelengthsSelected,'String',currentOpticalSystem.getNumberOfWavelengths)
-    set(aodHandles.popPrimaryWavlenIndex,'String',num2cell(1:currentOpticalSystem.getNumberOfWavelengths));
+    set(aodHandles.txtTotalWavelengthsSelected,'String',getNumberOfWavelengths(currentOpticalSystem))
+    set(aodHandles.popPrimaryWavlenIndex,'String',num2cell(1:getNumberOfWavelengths(currentOpticalSystem)));
     set(aodHandles.popPrimaryWavlenIndex,'Value',currentOpticalSystem.PrimaryWavelengthIndex);
     
     newTable1 = currentOpticalSystem.WavelengthMatrix;
@@ -90,7 +90,7 @@ function updateSystemConfigurationWindow( parentWindow )
     set(aodHandles.tblWavelengths, 'Data', newTable1);
     
     % field data
-    set(aodHandles.txtTotalFieldPointsSelected,'String',currentOpticalSystem.getNumberOfFieldPoints);
+    set(aodHandles.txtTotalFieldPointsSelected,'String',getNumberOfFieldPoints(currentOpticalSystem));
     set(aodHandles.radioAngle,'Value',strcmpi(char(currentOpticalSystem.FieldType),'Angle'));
     set(aodHandles.radioObjectHeight,'Value',strcmpi(char(currentOpticalSystem.FieldType),'ObjectHeight'));
     set(aodHandles.radioImageHeight,'Value',strcmpi(char(currentOpticalSystem.FieldType),'ImageHeight'));

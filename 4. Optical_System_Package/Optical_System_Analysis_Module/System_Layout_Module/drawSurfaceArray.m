@@ -32,7 +32,7 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
     % Oct 14,2013   Worku, Norman G.     Original Version       Version 3.0
     
     % <<<<<<<<<<<<<<<<<<<<< Main Code Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    if nargin > 0 && strcmpi(surfaceArray(1).getGridType,'Polar')
+    if nargin > 0 && strcmpi(getGridType(surfaceArray(1)),'Polar')
         %     nPoints1Default = 17;
         %     nPoints2Default = 33;
         nPoints1Default = 100;
@@ -112,7 +112,7 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
     for ss =  1:nSurface
         if ss > 1
             sameApertureType(ss-1) = strcmpi(surfaceArray(ss-1).Aperture.OuterShape,surfaceArray(ss).Aperture.OuterShape);
-            samegetGridType(ss-1) = strcmpi(surfaceArray(ss-1).getGridType,surfaceArray(ss).getGridType);
+            samegetGridType(ss-1) = strcmpi(getGridType(surfaceArray(ss-1)),getGridType(surfaceArray(ss)));
         end
         IsFreeSpace(ss) = (strcmpi(surfaceArray(ss).Glass.Name,'None')||...
             strcmpi(surfaceArray(ss).Glass.Name,'Air')||...
@@ -156,14 +156,14 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
                 % Set the aperure sizes to the aperture size
                 drawnAperture = [apartSizeX(ss),apartSizeY(ss)];
                 %             [outerApertShape,maximumRadiusXY] = getOuterAperture(surfaceArray(ss).Aperture);
-                xyzPoints1 = surfaceArray(ss).drawSurface(plotIn2D,nPoints1,nPoints2,...
+                xyzPoints1 = drawSurface(surfaceArray(ss),plotIn2D,nPoints1,nPoints2,...
                     -1,surfColor,2*drawnApertureRadiusXY(ss,:));
                 %             xyzPoints(:,:,:,ss) = xyzPoints1;
                 xyzPoints{ss} = xyzPoints1;
                 surfacePointsComputedFlag(ss) = 1;
                 
                 % Compute the single surface plot points from the xyzPoints1
-                if strcmpi(surfaceArray(ss).getGridType,'Polar')
+                if strcmpi(getGridType(surfaceArray(ss)),'Polar')
                     singleSurfaceBoarderX{singleSurfaceCounter} = [xyzPoints1(1,:,1)];
                     singleSurfaceBoarderY{singleSurfaceCounter} = [xyzPoints1(1,:,2)];
                     singleSurfaceBoarderZ{singleSurfaceCounter} = [xyzPoints1(1,:,3)];
@@ -189,7 +189,7 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
                 globalShift = [0,0,deltaZ]*(secondSurface.SurfaceCoordinateTM(1:3,1:3));
                 secondSurface.SurfaceCoordinateTM(1:3,4) = ...
                     secondSurface.SurfaceCoordinateTM(1:3,4)+globalShift';
-                xyzPoints2 = secondSurface.drawSurface(plotIn2D,nPoints1,nPoints2,...
+                xyzPoints2 = drawSurface(secondSurface,plotIn2D,nPoints1,nPoints2,...
                     -1,surfColor,2*drawnApertureRadiusXY(ss,:));
                 
                 % Draw the second surface of the mirror now % Not too optimum solution
@@ -245,7 +245,7 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
             
             if ~surfacePointsComputedFlag(ss)
                 % Compute the surface plot points and compute the singlet border
-                xyzPoints1 = surfaceArray(ss).drawSurface(plotIn2D,nPoints1,nPoints2,...
+                xyzPoints1 = drawSurface(surfaceArray(ss),plotIn2D,nPoints1,nPoints2,...
                     -1,surfColor(ss,:),2*drawnApertureRadiusXY(ss,:));
                 xyzPoints{ss} = xyzPoints1;
                 surfacePointsComputedFlag(ss) = 1;
@@ -261,14 +261,14 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
             end
             
             
-            xyzPoints2 = surfaceArray(ss+1).drawSurface(plotIn2D,nPoints1,nPoints2,...
+            xyzPoints2 = drawSurface(surfaceArray(ss+1),plotIn2D,nPoints1,nPoints2,...
                 -1,surfColor(ss,:),2*drawnApertureRadiusXY(ss+1,:));
             surfacePointsComputedFlag(ss+1) = 1;
             xyzPoints{ss+1} = xyzPoints2;
             
             % Compute the singlet boarder surface plot points from the
             % xyzPoints1 and xyzPoints2
-            if strcmpi(surfaceArray(ss).getGridType,'Polar')
+            if strcmpi(getGridType(surfaceArray(ss)),'Polar')
                 singletBoarderX{singletCounter} = [xyzPoints2(end,:,1);xyzPoints1(end,:,1)];
                 singletBoarderY{singletCounter} = [xyzPoints2(end,:,2);xyzPoints1(end,:,2)];
                 singletBoarderZ{singletCounter} = [xyzPoints2(end,:,3);xyzPoints1(end,:,3)];

@@ -13,9 +13,9 @@ function BuildChildWindowSettingPanel...
     [ myOpticalSystem,umSaved] = ...
         parentWindow.getCurrentOpticalSystem;
     
-    nSurface = myOpticalSystem.getNumberOfSurfaces;
-    nField = myOpticalSystem.getNumberOfFieldPoints;
-    nWavelength = myOpticalSystem.getNumberOfWavelengths;
+    nSurface = getNumberOfSurfaces(myOpticalSystem);
+    nField = getNumberOfFieldPoints(myOpticalSystem);
+    nWavelength = getNumberOfWavelengths(myOpticalSystem);
     AllSurfaceIndices = [num2cell(1:nSurface)];
     % min and max wavelengths are assumed to be in um
     minWavelengthInUm = getMinimumWavelength(myOpticalSystem)/10^-6;

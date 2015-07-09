@@ -30,7 +30,11 @@ function [ extractedObject,objectIndex,dispInfo ] = extractObjectFromObjectCatal
         else
             %check that the  object doesnot exsist in the catalogue
             name = objectName;
+            try
             location = find(strcmpi({ObjectArray.Name},name));
+            catch
+                location = '';
+            end
             if isempty(location)
                 extractedObject = NaN;
                 objectIndex = 0;

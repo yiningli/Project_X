@@ -20,7 +20,7 @@ function  updateQuickLayoutPanel(parentWindow,selectedSurfOrCompIndex)
             
             drawEdge = 1;
             [ updatedSystem,saved] = getCurrentOpticalSystem (parentWindow);
-            surfaceArray = updatedSystem.getNonDummySurfaceArray;
+            surfaceArray = getNonDummySurfaceArray(updatedSystem);
             
             drawSurfaceArray...
                 (surfaceArray,plotIn2D,nPoints1,nPoints2,...
@@ -42,7 +42,7 @@ function  updateQuickLayoutPanel(parentWindow,selectedSurfOrCompIndex)
                     surfaceArray = [];
                 end
             else
-                surfaceArray = getNonDummySurfaceArray(updatedSystem.ComponentArray(selectedSurfOrCompIndex));
+                surfaceArray = getComponentNonDummySurfaceArray(updatedSystem.ComponentArray(selectedSurfOrCompIndex));
             end
             if ~isempty(surfaceArray)
                 drawSurfaceArray...

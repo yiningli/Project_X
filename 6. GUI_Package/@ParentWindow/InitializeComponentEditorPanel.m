@@ -692,7 +692,7 @@ function RemoveComponent(parentWindow,removePosition)
     % Update the component array
     aodHandles.OpticalSystem.ComponentArray = aodHandles.OpticalSystem.ComponentArray([1:removePosition-1,removePosition+1:end]);
     if stopComponentRemoved
-        if aodHandles.OpticalSystem.ComponentArray(removePosition).ImageComponent
+        if strcmpi(aodHandles.OpticalSystem.ComponentArray(removePosition).Type,'IMAGE')
             aodHandles.OpticalSystem.ComponentArray(removePosition-1).Stop = 1;
         else
             aodHandles.OpticalSystem.ComponentArray(removePosition).Stop = 1;
@@ -701,7 +701,7 @@ function RemoveComponent(parentWindow,removePosition)
     % If possible add here a code to select the first cell of newly added row
     % automatically
     parentWindow.ParentHandles = aodHandles;
-    updateComponentOrComponentEditorPanel( parentWindow );
+    updateSurfaceOrComponentEditorPanel( parentWindow );
 end
 
 function actionConfirmed = IsSurfaceBasedSystemDefinition(parentWindow)
