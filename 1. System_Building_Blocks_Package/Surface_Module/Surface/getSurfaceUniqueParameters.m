@@ -37,12 +37,16 @@ function [fieldNames,fieldFormat,uniqueParamStruct] = getSurfaceUniqueParameters
     
     % Connect the surface definition function
     surfaceDefinitionHandle = str2func(surfaceType);
-    returnFlag = 'SSPB';
-    [fieldNames,fieldFormat,defaultUniqueParamStruct] = surfaceDefinitionHandle(returnFlag);
+    returnFlag = 2;
+    [returnDataStruct] = surfaceDefinitionHandle(returnFlag);
+    fieldNames = returnDataStruct.UniqueParametersStructFieldNames;
+    fieldFormat = returnDataStruct.UniqueParametersStructFieldTypes;
+    defaultUniqueParamStruct = returnDataStruct.DefaultUniqueParametersStruct;
+    
     if returnDefault
         uniqueParamStruct = defaultUniqueParamStruct;
     else
         uniqueParamStruct = currentSurface.UniqueParameters;
-    end  
+    end
 end
 

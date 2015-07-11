@@ -16,14 +16,11 @@ function [ paramType ] = getParameterType( currentSurface,parameterID )
     % <<<<<<<<<<<<<<<<<<< Change History Section >>>>>>>>>>>>>>>>>>>>>>>>>>
     % Date----------Modified By ---------Modification Detail--------Remark
     % Jun 17,2015   Worku, Norman G.     Original Version
-     
+    
     if isnumeric(parameterID)
-        surfaceDefinitionFileName = currentSurface.Type;
-        % Connect the surface definition function
-        surfaceDefinitionHandle = str2func(surfaceDefinitionFileName);
-        returnFlag = 'SSPB'; % Basic parameters of the surface
-        [ paramNames, paramTypes, defaultValue] = surfaceDefinitionHandle(returnFlag);
-        paramType = paramTypes{parameterID};
+        
+        [fieldNames,fieldFormat,uniqueParamStruct] = getSurfaceUniqueParameters( currentSurface );
+        paramType = fieldFormat{parameterID};
     else
         parameterName = parameterID;
         paramType = class(currentSurface.(parameterName));

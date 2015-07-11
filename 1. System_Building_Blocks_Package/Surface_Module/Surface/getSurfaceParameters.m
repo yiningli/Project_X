@@ -29,18 +29,21 @@ function [ paramNames,paramTypes,paramValues,paramValuesDisp] = ...
                 
                 
                 % Add additional surface type specific basic parameters
-                surfaceDefinitionFileName = currentSurface.Type;
-                % Connect the surface definition function
-                surfaceDefinitionHandle = str2func(surfaceDefinitionFileName);
-                returnFlag = 'SSPB'; % Other Basic parameters of the surface
-                [ uniqueParamNames, uniqueParamTypes, defualtParameterStruct] = surfaceDefinitionHandle(returnFlag);
-                surfaceParameters = currentSurface.UniqueParameters;
+%                 surfaceDefinitionFileName = currentSurface.Type;
+%                 % Connect the surface definition function
+% %                 surfaceDefinitionHandle = str2func(surfaceDefinitionFileName);
+% %                 returnFlag = 'SSPB'; % Other Basic parameters of the surface
+                [ uniqueParamNames, uniqueParamTypes, uniqueParametersStruct] = ...
+                    getSurfaceUniqueParameters( currentSurface);
+                
+%                 surfaceDefinitionHandle(returnFlag);
+%                 surfaceParameters = currentSurface.UniqueParameters;
                 
                 nUniqueParams = length(uniqueParamNames);
                 for kk = 1:nUniqueParams
                     paramNames{3+kk,1} = uniqueParamNames{kk};
                     paramTypes{3+kk,1} = uniqueParamTypes{kk};
-                    paramValues{3+kk,1} = surfaceParameters.(uniqueParamNames{kk});
+                    paramValues{3+kk,1} = uniqueParametersStruct.(uniqueParamNames{kk});
                     
                     switch lower(class(paramValues{3+kk,1}))
                         case lower('logical')
@@ -189,18 +192,22 @@ function [ paramNames,paramTypes,paramValues,paramValuesDisp] = ...
                         paramValues{1,1} = currentSurface.Coating;
                         paramValuesDisp{1,1} = currentSurface.Coating.Name;
                     otherwise
-                        % Add additional surface type specific basic parameters
-                        surfaceDefinitionFileName = currentSurface.Type;
-                        % Connect the surface definition function
-                        surfaceDefinitionHandle = str2func(surfaceDefinitionFileName);
-                        returnFlag = 'SSPB'; % Other Basic parameters of the surface
-                        [ uniqueParamNames, uniqueParamTypes, defualtParameterStruct] = surfaceDefinitionHandle(returnFlag);
-                        surfaceParameters = currentSurface.UniqueParameters;
+                       % Add additional surface type specific basic parameters
+                       
+%                         surfaceDefinitionFileName = currentSurface.Type;
+%                         % Connect the surface definition function
+%                         surfaceDefinitionHandle = str2func(surfaceDefinitionFileName);
+%                         returnFlag = 'SSPB'; % Other Basic parameters of the surface
+%                         [ uniqueParamNames, uniqueParamTypes, defualtParameterStruct] = surfaceDefinitionHandle(returnFlag);
+%                         uniqueParametersStruct = currentSurface.UniqueParameters;
                         
+                                        [ uniqueParamNames, uniqueParamTypes, uniqueParametersStruct] = ...
+                    getSurfaceUniqueParameters( currentSurface);
+                
                         uniqueParamIndex = rowNumber-3;
                         paramNames{1,1} = uniqueParamNames{uniqueParamIndex};
                         paramTypes{1,1} = uniqueParamTypes{uniqueParamIndex};
-                        paramValues{1,1} = surfaceParameters.(uniqueParamNames{uniqueParamIndex});
+                        paramValues{1,1} = uniqueParametersStruct.(uniqueParamNames{uniqueParamIndex});
                         switch lower(class(paramValues{1,1}))
                             case lower('logical')
                                 if paramValues{1,1}

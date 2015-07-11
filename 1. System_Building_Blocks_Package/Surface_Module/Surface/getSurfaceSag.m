@@ -1,4 +1,4 @@
-function [ surfaceSag1,surfaceSag2 ] = getSurfaceSag( surface,xyCoordinateMeshgrid,actualSurfacePointIndices )
+function [ surfaceSagMain,surfaceSagAlternative ] = getSurfaceSag( surface,xyCoordinateMeshgrid,actualSurfacePointIndices )
     %GETSURFACESAG returns the surface sag in local coordinate for the given
     %local xy coordinates
     % Inputs:
@@ -16,31 +16,28 @@ function [ surfaceSag1,surfaceSag2 ] = getSurfaceSag( surface,xyCoordinateMeshgr
     % <<<<<<<<<<<<<<<<<<< Change History Section >>>>>>>>>>>>>>>>>>>>>>>>>>
     % Date----------Modified By ---------Modification Detail--------Remark
     % Jun 17,2015   Worku, Norman G.     Original Version
-    
+    % Jul 10,2015   Worku, Norman G.     input and output are made struct    
+
     surfaceType = surface.Type;
     surfaceParameters = surface.UniqueParameters;
-    rayPosition = [];
-    rayDirection = [];
-    indexBefore = [];
-    indexAfter = [];
-    wavlenInM = [];
-    surfaceNormal = [];
-    reflection = [];
+    returnFlag = 4; % Sag
+    inputDataStruct = struct();
+    inputDataStruct.xyMeshGrid = xyCoordinateMeshgrid;
     % Connect the surface definition function
     surfaceDefinitionHandle = str2func(surfaceType);
-    returnFlag = 'SSAG';
-    [ z1,z2] = surfaceDefinitionHandle(...
-        returnFlag,surfaceParameters,rayPosition,rayDirection,indexBefore,...
-        indexAfter,wavlenInM,surfaceNormal,reflection,xyCoordinateMeshgrid);
-    % z values will be complex for points outside the actual surface.
+    [returnDataStruct] = surfaceDefinitionHandle(returnFlag,surfaceParameters,inputDataStruct);
+    mainSag = returnDataStruct.MainSag;
+    alternativeSag = returnDataStruct.AlternativeSag;
+    
+    % Sag values will be complex for points outside the actual surface.
     % So replace the complex z values with the neighboring values
-    realSag = real(z1);
+    realSag = real(mainSag);
     
     realSag1 = realSag(actualSurfacePointIndices);
     extremeZ = realSag1(1);
     realSag(~actualSurfacePointIndices) = extremeZ;
     
-    surfaceSag1 = realSag;
-    surfaceSag2 = realSag;
+    surfaceSagMain = realSag;
+    surfaceSagAlternative = realSag;
 end
 

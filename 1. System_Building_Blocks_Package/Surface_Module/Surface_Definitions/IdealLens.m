@@ -1,206 +1,233 @@
-function [ returnData1, returnData2, returnData3] = IdealLens(...
-    returnFlag,surfaceParameters,rayPosition,rayDirection,indexBefore,...
-    indexAfter,wavlenInM,surfNormal,reflection,xyCoordinateMeshGrid,...
-    refWavlenInM,paraxialRayParameter,reverseTracing)
-%IdealLens Ideal lens definition
-% surfaceParameters = values of {'FocalLength'}
-
-% returnFlag : A four char word indicating what is requested 
-% ABTS: About the surface 
-% SSPB: Surface specific 'BasicSurfaceDataFields' table field names and initial values in Surface Editor GUI 
-% SSPE: Surface specific 'Extra Data' table field names and initial values in Surface Editor GUI 
-% PLTS: Return path length to the surface intersection points for given 
-% SIAN: Return the surface intersection points and surface normal for given incident Ray parameters
-% SSAG: Return the surface sag at given xyGridPoints % Used for plotting the surface 
-% GRTY: Returns the grid type to be used for ploting 'Rectangular' or 'Polar' 
-% EXRD: Returns the exit ray direction 
-% EXRP: Returns the exit ray position 
-% PRYT: Returns the output paraxial ray parameters 
-
-%% Default input vaalues
-if nargin == 0
-    disp('Error: The function IdealLens() needs atleat the return type.');
-    returnData1 = NaN;
-    returnData2 = NaN;
-    returnData3 = NaN;
-    return;
-elseif nargin == 1
-    if strcmpi(returnFlag,'ABTS') || strcmpi(returnFlag,'SSPB') || strcmpi(returnFlag,'SSPE') || strcmpi(returnFlag,'GRTY')
-        surfaceParameters = [];
-        rayPosition = [];
-        rayDirection = [];
-        xyCoordinateMeshgrid = [];       
-    else
-        disp('Error: Missing input argument for IdealLens().');
-        returnData1 = NaN;
-        returnData2 = NaN;
-        returnData3 = NaN;
-        return;        
-    end
-elseif nargin == 2
-    if strcmpi(returnFlag,'ABTS') || strcmpi(returnFlag,'SSPB') || strcmpi(returnFlag,'SSPE') || strcmpi(returnFlag,'GRTY')
-        surfaceParameters = [];
-        rayPosition = [];
-        rayDirection = [];
-        xyCoordinateMeshgrid = [];       
-    else
-        disp('Error: Missing input argument for IdealLens().');
-        returnData1 = NaN;
-        returnData2 = NaN;
-        returnData3 = NaN;
-        return;        
-    end        
-elseif nargin == 3
-    if strcmpi(returnFlag,'ABTS') || strcmpi(returnFlag,'SSPB') || strcmpi(returnFlag,'SSPE') ||  strcmpi(returnFlag,'GRTY')
-        surfaceParameters = [];
-        rayPosition = [];
-        rayDirection = [];
-        xyCoordinateMeshgrid = [];       
-    else
-        disp('Error: Missing input argument for IdealLens().');
-        returnData1 = NaN;
-        returnData2 = NaN;
-        returnData3 = NaN;
-        return;        
-    end
-elseif nargin == 4
-    if strcmpi(returnFlag,'ABTS') || strcmpi(returnFlag,'SSPB') || strcmpi(returnFlag,'SSPE')|| strcmpi(returnFlag,'PLTS') || strcmpi(returnFlag,'SIAN') || strcmpi(returnFlag,'GRTY')
-        xyCoordinateMeshgrid = [];       
-    else
-        disp('Error: Missing input argument for IdealLens().');
-        returnData1 = NaN;
-        returnData2 = NaN;
-        returnData3 = NaN;
-        return;        
-    end        
-else
-end
-
-%%
-switch upper(returnFlag)
-    case 'ABTS' % About the surface ABTS
-        returnData1 = {'IdealLens','IDLN'}; % display name
-        % look for image description in the current folder and return 
-        % full address 
-        [pathstr,name,ext] = fileparts(mfilename('fullpath'));
-        returnData2 = {[pathstr,'\Surface.jpg']};  % Image file name
-        returnData3 = {['Ideal Lens: Used to define an ideal paraxial lens.']};  % Text description   
-        
-    case 'SSPB' % 'BasicSurfaceDataFields' table field names and initial values in Surface Editor GUI SSPB
-        returnData1 = {'FocalLength'};
-        returnData2 = {{'numeric'}}; 
-        defaultSurfUniqueStruct = struct();
-        defaultSurfUniqueStruct.FocalLength = 100;     
-        returnData3 = defaultSurfUniqueStruct;        
-    case 'SSPE' % 'Extra Data' table field names and initial values in Surface Editor GUI SSPE
-        returnData1 = {'Unused'};
-        returnData2 = {{'char'}};
-        returnData3 = {[0]};
-    case 'PLTS' % Return path length to the surface intersection points for given PLSI
-        % Just assume plane surface
-        focalLength = surfaceParameters.FocalLength;
-        nRay = size(rayPosition,2);
-        initialPoint = rayPosition; % define the start point
-        k = rayDirection(1,:);
-        l = rayDirection(2,:);
-        m = rayDirection(3,:);
-        distanceToXY = -initialPoint(3,:)./m;
-        intersectionPointXY  = ...
-                    [initialPoint(1,:) +  distanceToXY.*k;...
-            initialPoint(2,:) +  distanceToXY.*l;...
-            zeros([1,nRay])];
-        
-        returnData1 = distanceToXY;
-        NoIntersectioPoint = zeros([1,nRay]);
-        NoIntersectioPoint(~(isreal(distanceToXY))) = 1;
-        returnData2 = NoIntersectioPoint;
-        % Ref: http://www2.ph.ed.ac.uk/~wjh/teaching/mo/slides/lens/lens.pdf
-%         additionalPhaseInAxialDir = -(2*pi./wavlenInM).*(intersectionPointXY(1,:).^2+intersectionPointXY(2,:).^2)./(2*focalLength);
-%         returnData3 = -(intersectionPointXY(1,:).^2+intersectionPointXY(2,:).^2)/(2*focalLength);
-         returnData3 = -(sqrt(intersectionPointXY(1,:).^2+intersectionPointXY(2,:).^2 + focalLength^2)-focalLength);
-%          returnData3 = -(2*pi/(wavlenInM)).*(intersectionPointXY(1,:).^2+intersectionPointXY(2,:).^2)/(2*focalLength);
-       
-        %         disp('Error: Currently computation of optical path due to ideal lens is not implemented.');
-    case 'SIAN'  % Return the surface intersection points and surface normal for given incident Ray parameters SIAN
-        % Just assume plane surface
-        nRay = size(rayPosition,2);
-        initialPoint = rayPosition; % define the start point
-        k = rayDirection(1,:);
-        l = rayDirection(2,:);
-        m = rayDirection(3,:);
-        distanceToXY = -initialPoint(3,:)./m;
-        intersectionPointXY  = ...
-            [initialPoint(1,:) +  distanceToXY.*k;...
-            initialPoint(2,:) +  distanceToXY.*l;...
-            zeros([1,nRay])];
-        surfaceNormal = repmat([0;0;1],[1,nRay]);
-        returnData1 = intersectionPointXY;
-        returnData2 = surfaceNormal;
-        returnData3 = NaN;
-    case 'SSAG' % Return the surface sag at given xyGridPoints % Used for plotting the surface SSAG
-        % Just assume plane surface
-        r = computeNormOfMatrix(xyCoordinateMeshGrid,3);
-        % test fresnel zones
-        z = 0*r;
-        returnData1 = z;
-        returnData2 = z;
-        returnData3 = NaN;
-    case 'GRTY' % Returns the grid type to be used for ploting 'Rectangular' or 'Polar' GRTY
-        returnData1 = 'Polar';
-        returnData2 = NaN;
-        returnData3 = NaN;
-    case 'EXRD' % Returns the exit ray direction EXRD
-        focalLength = surfaceParameters.FocalLength;
-        % using gaussian thin lens equation 1/f = -n/t+n'/t' 
-        % first compute the intersection of the lines with local z axis on
-        % the object side
-        linePoint = rayPosition;
-        lineVector = rayDirection;
-        planePoint = [0,0,0]';
-        planeNormalVector = [0,1,0]';
-        [objectSideZAxisIntersection,distance] = computeLinePlaneIntersection(...
-            linePoint,lineVector,planePoint,planeNormalVector);
-        thicknessBefore = objectSideZAxisIntersection(3,:);
-        % compute image side intersection t'=(ft)/((-fn+t)*n')
-        thicknessAfter = (focalLength)./((indexBefore.*focalLength./thicknessBefore + 1).*indexAfter);
-        % now compute the new ray direction
-        dxAfter = -(rayPosition(1,:));
-        dyAfter = -(rayPosition(2,:));
-        dzAfter = thicknessAfter;
-        exitRayDirection = normalize2DMatrix([dxAfter;dyAfter;dzAfter],1);
-        
-        TIR = ones(1,size(exitRayDirection,2));
-        
-        returnData1 = exitRayDirection;
-        returnData2 = TIR;
-        returnData3 = NaN;
-    case 'EXRP' % Returns the exit ray position EXRP
-        % Just return the ray position
-        exitRayPosition = rayPosition;
-        
-        returnData1 = exitRayPosition;
-        returnData2 = NaN;
-        returnData3 = NaN;
-    case 'PRYT'  % Returns the output paraxial ray parameters PRYT
-        y = paraxialRayParameter(1);
-        u = paraxialRayParameter(2);
-        focalLength = surfaceParameters.FocalLength;
-        % Use the ABCD matrix for paraxial ray tracing
-        A = 1; B = 0; C = -1/focalLength; D = 1;
-        ABCD = [A,B;C,D];
-        invABCD = (1/(A*D-B*C))*[D,-B;-C,A];
-        if ~reverseTracing
-            %forward trace 
-            yf = ABCD(1,1)*y + ABCD(1,2)*u ;
-            uf = ABCD(2,1)*y + ABCD(2,2)*u ;            
+function [ returnDataStruct] = IdealLens(returnFlag,surfaceParameters,inputDataStruct)
+    %IdealLens Ideal lens definition
+    % surfaceParameters = values of {'FocalLength'}
+    % rayPosition and rayDirections: 3xN matrix of ray positions [x,y,z] and directions [dx,dy,dz]
+    % paraxialRayParameter: 2xN matrix of paraxial heigh and angle [y,u]
+    % reverseTracing: boolean indicating direction of ray trace (currently
+    % supported only for paraxial tracing)
+    
+    % returnFlag : An integer indicating what is requested. Depending on it the
+    % returnDataStruct will have different fields
+    % 1: About the surface
+    %   inputDataStruct:
+    %       empty
+    %   Output Struct:
+    %       returnDataStruct.Name
+    %       returnDataStruct.ImageFullFileName
+    %       returnDataStruct.Description
+    % 2: Surface specific 'UniqueSurfaceParameters' table field names and initial values in Surface Editor GUI
+    %   inputDataStruct:
+    %       empty
+    %   Output Struct:
+    %       returnDataStruct.UniqueParametersStructFieldNames
+    %       returnDataStruct.UniqueParametersStructFieldTypes
+    %       returnDataStruct.DefaultUniqueParametersStruct
+    % 3: Surface specific 'Extra Data' table field names and initial values in Surface Editor GUI
+    %   inputDataStruct:
+    %       empty
+    %   Output Struct:
+    %       returnDataStruct.UniqueExtraDataFieldNames
+    %       returnDataStruct.DefaultUniqueExtraData
+    % 4: Return the surface sag at given xyGridPoints computed from rayPosition % Used for plotting the surface
+    %   inputDataStruct:
+    %       inputDataStruct.xyMeshGrid
+    %   Output Struct:
+    %       returnDataStruct.MainSag
+    %       returnDataStruct.AlternativeSag
+    % 5: Paraxial ray trace results (Ray height and angle)
+    %   inputDataStruct:
+    %       inputDataStruct.InputParaxialRayParameters
+    %       inputDataStruct.IndexBefore
+    %       inputDataStruct.IndexAfter
+    %       inputDataStruct.Wavelength
+    %       inputDataStruct.ReflectionFlag
+    %       inputDataStruct.ReverseTracingFlag
+    %   Output Struct:
+    %       returnDataStruct.OutputParaxialRayParameters
+    % 6: Real Ray trace results (Surface intersection points, Surface normal, Path length to the surface intersection points, Exit ray direction, Exit ray position for given
+    %   inputDataStruct:
+    %       inputDataStruct.InitialRayPosition
+    %       inputDataStruct.InitialRayDirection
+    %       inputDataStruct.IndexBefore
+    %       inputDataStruct.IndexAfter
+    %       inputDataStruct.Wavelength
+    %       inputDataStruct.ReferenceWavelength
+    %       inputDataStruct.ReflectionFlag
+    %       inputDataStruct.ReverseTracingFlag
+    %   Output Struct:
+    %       returnDataStruct.GeometricalPathLength
+    %       returnDataStruct.AdditionalPathLength
+    %       returnDataStruct.LocalRayIntersectionPoint
+    %       returnDataStruct.LocalSurfaceNormal
+    %       returnDataStruct.LocalExitRayPosition
+    %       returnDataStruct.LocalExitRayDirection
+    %       returnDataStruct.TotalInternalReflectionFlag
+    %       returnDataStruct.NoIntersectionPointFlag
+    
+    % <<<<<<<<<<<<<<<<<<<<<<<<< Author Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    %   Written By: Worku, Norman Girma
+    %   Advisor: Prof. Herbert Gross
+    %	Optical System Design and Simulation Research Group
+    %   Institute of Applied Physics
+    %   Friedrich-Schiller-University of Jena
+    
+    % <<<<<<<<<<<<<<<<<<< Change History Section >>>>>>>>>>>>>>>>>>>>>>>>>>
+    % Date----------Modified By ---------Modification Detail--------Remark
+    % Jun 17,2015   Worku, Norman G.     Original Version
+    % Jul 10,2015   Worku, Norman G.     input and output are made struct
+    %% Default input vaalues
+    if nargin == 0
+        disp('Error: The function IdealLens() needs atleat the return type.');
+        returnDataStruct = struct;
+        return;
+    elseif nargin == 1 || nargin == 2
+        if returnFlag == 1 || returnFlag == 2 || returnFlag == 3 || returnFlag == 4
+            inputDataStruct = struct();
         else
-            %reverse trace 
-            yf = invABCD(1,1)*y + invABCD(1,2)*u ;
-            uf = invABCD(2,1)*y + invABCD(2,2)*u ;             
-        end        
+            disp('Error: Missing input argument for IdealLens().');
+            returnDataStruct = struct();
+            return;
+        end
+    elseif nargin == 3
+        % This is fine
+    else
         
-        returnData1 = [yf,uf]';
-        returnData2 = NaN;
-        returnData3 = NaN;
+    end
+    switch returnFlag
+        case 1 % About the surface
+            surfName = {'IdealLens','IDLN'}; % display name
+            % look for image description in the current folder and return
+            % full address
+            [pathstr,name,ext] = fileparts(mfilename('fullpath'));
+            imageFullFileName = {[pathstr,'\Surface.jpg']};  % Image file name
+            description = {['Ideal Lens: Used to define an ideal paraxial lens.']};  % Text description
+            
+            returnDataStruct = struct();
+            returnDataStruct.Name = surfName;
+            returnDataStruct.ImageFullFileName = imageFullFileName;
+            returnDataStruct.Description =  description;
+        case 2 % Surface specific 'UniqueSurfaceParameters'
+            uniqueParametersStructFieldNames = {'FocalLength'};
+            uniqueParametersStructFieldTypes = {{'numeric'}};
+            defaultUniqueParametersStruct = struct();
+            defaultUniqueParametersStruct.FocalLength = 100;
+            
+            returnDataStruct = struct();
+            returnDataStruct.UniqueParametersStructFieldNames = uniqueParametersStructFieldNames;
+            returnDataStruct.UniqueParametersStructFieldTypes = uniqueParametersStructFieldTypes;
+            returnDataStruct.DefaultUniqueParametersStruct = defaultUniqueParametersStruct;
+        case 3 % Surface specific 'Extra Data' table
+            uniqueExtraDataFieldNames = {'Unused'};
+            defaultUniqueExtraData = {[0]};
+            
+            returnDataStruct = struct();
+            returnDataStruct.UniqueExtraDataFieldNames = uniqueExtraDataFieldNames;
+            returnDataStruct.DefaultUniqueExtraData = defaultUniqueExtraData;
+        case 4 % Surface sag at given xyGridPoints
+            % Just assume plane surface
+            xyCoordinateMeshGrid = inputDataStruct.xyMeshGrid;
+            mainSag = zeros(size(xyCoordinateMeshGrid,1),size(xyCoordinateMeshGrid,2));
+            
+            returnDataStruct = struct();
+            returnDataStruct.MainSag = mainSag;
+            returnDataStruct.AlternativeSag = mainSag;
+        case 5 % Paraxial ray trace results
+            y = inputDataStruct.InputParaxialRayParameters(1,:);
+            u = inputDataStruct.InputParaxialRayParameters(2,:);
+            reverseTracing = inputDataStruct.ReverseTracingFlag;
+            indexBefore = inputDataStruct.IndexBefore;
+            indexAfter = inputDataStruct.IndexAfter;
+            focalLength = surfaceParameters.FocalLength;
+            % Use the ABCD matrix for paraxial ray tracing
+            A = 1; B = 0; C = -1/focalLength; D = 1;
+            ABCD = [A,B;C,D];
+            invABCD = (1/(A*D-B*C))*[D,-B;-C,A];
+            if ~reverseTracing
+                %forward trace
+                yf = ABCD(1,1)*y + ABCD(1,2)*u ;
+                uf = ABCD(2,1)*y + ABCD(2,2)*u ;
+            else
+                %reverse trace
+                yf = invABCD(1,1)*y + invABCD(1,2)*u ;
+                uf = invABCD(2,1)*y + invABCD(2,2)*u ;
+            end
+            
+            outputParaxialRayParameters = [yf,uf]';
+            
+            returnDataStruct = struct();
+            returnDataStruct.OutputParaxialRayParameters = outputParaxialRayParameters;
+        case 6 % Real Ray trace results
+            rayPosition = inputDataStruct.InitialRayPosition;
+            rayDirection = inputDataStruct.InitialRayDirection;
+            reverseTracing = inputDataStruct.ReverseTracingFlag;
+            reflection = inputDataStruct.ReflectionFlag;
+            indexBefore = inputDataStruct.IndexBefore;
+            indexAfter = inputDataStruct.IndexAfter;
+            wavlenInM = inputDataStruct.Wavelength;
+            
+            focalLength = surfaceParameters.FocalLength;
+            %% Path length calculation
+            % Just assume plane surface
+            nRay = size(rayPosition,2);
+            initialPoint = rayPosition; % define the start point
+            k = rayDirection(1,:);
+            l = rayDirection(2,:);
+            m = rayDirection(3,:);
+            distanceToXY = -initialPoint(3,:)./m;
+            intersectionPointXY  = ...
+                [initialPoint(1,:) +  distanceToXY.*k;...
+                initialPoint(2,:) +  distanceToXY.*l;...
+                zeros([1,nRay])];
+            
+            geometricalPathLength = distanceToXY;
+            NoIntersectioPoint = zeros([1,nRay]);
+            NoIntersectioPoint(~(isreal(distanceToXY))) = 1;
+            noIntersectionPointFlag = NoIntersectioPoint;
+            
+            % Ref: http://www2.ph.ed.ac.uk/~wjh/teaching/mo/slides/lens/lens.pdf
+            % additionalPathLength = -(2*pi./wavlenInM).*(intersectionPointXY(1,:).^2+intersectionPointXY(2,:).^2)./(2*focalLength);
+            % additionalPathLength = -(intersectionPointXY(1,:).^2+intersectionPointXY(2,:).^2)/(2*focalLength);
+            additionalPathLength = -(sqrt(intersectionPointXY(1,:).^2+intersectionPointXY(2,:).^2 + focalLength^2)-focalLength);
+            % additionalPathLength = -(2*pi/(wavlenInM)).*(intersectionPointXY(1,:).^2+intersectionPointXY(2,:).^2)/(2*focalLength);
+            
+            %% Intersection point calculation
+            localSurfaceNormal = repmat([0;0;1],[1,nRay]);
+            localRayIntersectionPoint = intersectionPointXY;
+            
+            %% Exit ray position and direction
+            localExitRayPosition = localRayIntersectionPoint;
+            % using gaussian thin lens equation 1/f = -n/t+n'/t'
+            % first compute the intersection of the lines with local z axis on
+            % the object side
+            linePoint = rayPosition;
+            lineVector = rayDirection;
+            planePoint = [0,0,0]';
+            planeNormalVector = [0,1,0]';
+            [objectSideZAxisIntersection,distance] = computeLinePlaneIntersection(...
+                linePoint,lineVector,planePoint,planeNormalVector);
+            thicknessBefore = objectSideZAxisIntersection(3,:);
+            % compute image side intersection t'=(ft)/((-fn+t)*n')
+            thicknessAfter = (focalLength)./((indexBefore.*focalLength./thicknessBefore + 1).*indexAfter);
+            % now compute the new ray direction
+            dxAfter = -(rayPosition(1,:));
+            dyAfter = -(rayPosition(2,:));
+            dzAfter = thicknessAfter;
+            exitRayDirection = normalize2DMatrix([dxAfter;dyAfter;dzAfter],1);
+            TIR = ones(1,size(exitRayDirection,2));
+            
+            localExitRayDirection = exitRayDirection;
+            totalInternalReflectionFlag = TIR;
+            
+            returnDataStruct = struct();
+            returnDataStruct.GeometricalPathLength = geometricalPathLength;
+            returnDataStruct.AdditionalPathLength = additionalPathLength;
+            returnDataStruct.LocalRayIntersectionPoint = localRayIntersectionPoint;
+            returnDataStruct.LocalSurfaceNormal = localSurfaceNormal;
+            returnDataStruct.LocalExitRayPosition = localExitRayPosition;
+            returnDataStruct.LocalExitRayDirection = localExitRayDirection;
+            returnDataStruct.TotalInternalReflectionFlag = totalInternalReflectionFlag;
+            returnDataStruct.NoIntersectionPointFlag = noIntersectionPointFlag;
+        otherwise
+    end
 end
-end
+

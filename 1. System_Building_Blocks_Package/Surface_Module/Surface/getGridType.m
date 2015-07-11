@@ -27,11 +27,5 @@ function [ gridType ] = getGridType( currentSurface )
             disp('Error: Unsapported aperture outer shape. So the default rectangular grid is used.');
             gridType = 'Rectangular';
     end
-    
-%     surfaceType = currentSurface.Type;
-%     % Connect the surface definition function
-%     surfaceDefinitionHandle = str2func(surfaceType);
-%     returnFlag = 'GRTY';
-%     gridType = surfaceDefinitionHandle(returnFlag);
 end
 

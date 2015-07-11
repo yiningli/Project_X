@@ -115,18 +115,30 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
      outsidePupilIndices   ] = ...
     computeInitialRayArray( optSystem, wavLenInWavUnit,...
     fieldPointXYInLensUnit, nRay1,nRay2,pupSamplingType);
-    nRayTotal = size(pupilSamplingPoints,2);
+    nRayPupil = size(pupilSamplingPoints,2);
   
     %===============RAYTRACE For Bundle of Ray========================
-    rayTraceResult = rayTracer(optSystem,initialRayBundle,considerPolarization,considerSurfAperture,recordIntermediateResults,endSurface); 
-    if recordIntermediateResults
-        multipleRayTracerResult = reshape(rayTraceResult,[nNonDummySurfaceConsidered,nRayTotal,nField,nWav]); %(nNonDummySurface X nRay X nField X nWav)
-    else
-        multipleRayTracerResult = reshape(rayTraceResult,[2,nRayTotal,nField,nWav]); %(2 X nRay X nField X nWav)
+    rayTraceResult = rayTracer(optSystem,initialRayBundle,considerPolarization,considerSurfAperture,recordIntermediateResults,endSurface,nRayPupil,nField,nWav); 
+    
+    nSurf = length(rayTraceResult);
+    if nNonDummySurfaceConsidered ~= nSurf
+        disp('Error: The number of surfaces mismatch. please check the multiple ray tracer function line 125.')
     end
+    % Reshape the raytrace result so that each ray result can be accessed
+    % individually and simply
+    multipleRayTracerResult(nSurf,nRayPupil,nField,nWav) = struct;
+    
+    for kk = 1:nSurf
+        multipleRayTracerResult(kk,:,:,:) = (rayTraceResult(kk)); %(nNonDummySurface X nRay X nField X nWav)
+    end
+%     if recordIntermediateResults
+%         multipleRayTracerResult = reshape(rayTraceResult,[nNonDummySurfaceConsidered,nRayPupil,nField,nWav]); %(nNonDummySurface X nRay X nField X nWav)
+%     else
+%         multipleRayTracerResult = reshape(rayTraceResult,[2,nRayPupil,nField,nWav]); %(2 X nRay X nField X nWav)
+%     end
     pupilCoordinates = pupilSamplingPoints;
     timeElapsed =  toc;
     disp(['Ray Bundle Trace Completed. Polarized  = ',num2str(considerPolarization), ...
-        ', Total Number  = ', num2str(nRayTotal*nField*nWav), ', Time Elapsed = ', ...
+        ', Total Number  = ', num2str(nRayPupil*nField*nWav), ', Time Elapsed = ', ...
         num2str(timeElapsed)]); 
 end  

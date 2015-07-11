@@ -74,23 +74,60 @@
 % end
 % toc
 
-%% Test using Object and structures programmed in object oriented approach
-% Creation
-warning off
-n = 10000;
+% %% Test using Object and structures programmed in object oriented approach
+% % Creation
+% warning off
+% n = 10000;
+% tic
+% for kk = 1:n
+%     surf = Surface('Standard');
+%     surf.Stop = 1;
+%     [ radius ] = getRadiusOfCurvature( surf );
+% end
+% toc
+% 
+% tic
+% for kk = 1:n
+%      surf = SurfaceStruct('Standard');
+% %     surf = struct(Surface('Standard'));
+%     surf.Stop = 1;
+%     [ radius ] = getRadiusOfCurvatureStruct( surf );
+% end
+% toc
+
+% %% Test performance of str2func function
+% n = 1;
+% myName = 'MyFunction';
+% tic
+% for kk = 1:n
+%     A =  str2func(myName);
+%     whos A
+% end
+% toc
+% tic
+% for kk = 1:n
+%      A =   ['@',myName];
+% %       B =   @myName;
+%      whos A
+% %      whos B
+% end
+% toc
+
+%% Test struct initialization using arrayfun instead of loops
+myStru.id = 0;
+myStru.name = 'blah';
+n = 100;
+
+arrayStru = repmat(myStru,n,1);  % Array of 10 elements. All of them have id=0
+
+disp('setfield');
 tic
-for kk = 1:n
-    surf = Surface('Standard');
-    surf.Stop = 1;
-    [ radius ] = getRadiusOfCurvature( surf );
-end
+arrayStru = cell2mat( arrayfun( @(x,y)setfield(x,'id',y), arrayStru, (1:n)', 'UniformOutput', false ) ); % ids ranging from 1 to 10 :D
 toc
 
+disp('loop');
 tic
 for kk = 1:n
-     surf = SurfaceStruct('Standard');
-%     surf = struct(Surface('Standard'));
-    surf.Stop = 1;
-    [ radius ] = getRadiusOfCurvatureStruct( surf );
+    arrayStru(kk).id = kk;
 end
 toc
