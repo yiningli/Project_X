@@ -31,7 +31,7 @@ function [ localPosition ] = globalToLocalPosition( globalPosition,surfaceCoordi
     nRay = size(globalPosition,2);
     surfPosition = surfaceCoordinateTM(1:3,4);
     toLocalRotation = surfaceCoordinateTM(1:3,1:3); % from global to local
-    newTranslatedPosition = globalPosition - repmat(surfPosition,[1,nRay]);      
+    newTranslatedPosition = globalPosition - surfPosition*ones(1,nRay);%repmat(surfPosition,[1,nRay]);      
     localPosition = (toLocalRotation*newTranslatedPosition);    
 end
 

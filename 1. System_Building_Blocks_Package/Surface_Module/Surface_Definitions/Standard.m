@@ -277,24 +277,24 @@ function surfaceNormal = computeStandardSurfaceNormal...
     end
     switch surfaceType
         case {'Plane'}
-            surfaceNormal = repmat([0;0;1],[1,nRay]);
+            surfaceNormal = [0;0;1]*ones(1,nRay);%repmat([0;0;1],[1,nRay]);
         case 'Spherical'
             curv = 1/(surfaceRadius);
             normal = [-curv*intersectionPoint(1,:);-curv*intersectionPoint(2,:);...
                 1-curv*intersectionPoint(3,:)];
-            surfaceNormal = normal./repmat(sum(normal.^2,1),[3,1]);
+            surfaceNormal = normal./ones(3,1)*sum(normal.^2,1);%repmat(sum(normal.^2,1),[3,1]);
         case 'Conic Aspherical'
             curv = 1/(surfaceRadius);
             denom = (sqrt(1-2*curv*surfaceConic*intersectionPoint(3,:) + ...
                 curv^2*(1+surfaceConic)*surfaceConic*intersectionPoint(3,:).^2));
             normal = [-curv*intersectionPoint(1,:); -curv*intersectionPoint(2,:);...
                 1-curv*(1+surfaceConic)*intersectionPoint(3,:)]./...
-                repmat(denom,[3,1]);
+                ones(3,1)*denom;%repmat(denom,[3,1]);
             % to determine if the normal vector cosines are real
             S3 = 1-(1+surfaceConic)*curv^2*((intersectionPoint(1,:)).^2 + ...
                 (intersectionPoint(2,:)).^2);
             normal(:,S3<0) = NaN;
-            surfaceNormal = normal./repmat(sum(normal.^2,1),[3,1]);
+            surfaceNormal = normal./ones(3,1)*sum(normal.^2,1);%repmat(sum(normal.^2,1),[3,1]);
     end
 end
 

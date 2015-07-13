@@ -113,21 +113,33 @@
 % end
 % toc
 
-%% Test struct initialization using arrayfun instead of loops
-myStru.id = 0;
-myStru.name = 'blah';
-n = 100;
+% %% Test struct initialization using arrayfun instead of loops
+% myStru.id = 0;
+% myStru.name = 'blah';
+% n = 100;
+% 
+% arrayStru = repmat(myStru,n,1);  % Array of 10 elements. All of them have id=0
+% 
+% disp('setfield');
+% tic
+% arrayStru = cell2mat( arrayfun( @(x,y)setfield(x,'id',y), arrayStru, (1:n)', 'UniformOutput', false ) ); % ids ranging from 1 to 10 :D
+% toc
+% 
+% disp('loop');
+% tic
+% for kk = 1:n
+%     arrayStru(kk).id = kk;
+% end
+% toc
 
-arrayStru = repmat(myStru,n,1);  % Array of 10 elements. All of them have id=0
-
-disp('setfield');
+%% Test repmat
+A = magic(6);
+meanA = mean(A);
 tic
-arrayStru = cell2mat( arrayfun( @(x,y)setfield(x,'id',y), arrayStru, (1:n)', 'UniformOutput', false ) ); % ids ranging from 1 to 10 :D
+r = A - (ones(size(A, 1), 1) * meanA);
 toc
 
-disp('loop');
 tic
-for kk = 1:n
-    arrayStru(kk).id = kk;
-end
+r = A - repmat(meanA,[size(A, 1),1]);
 toc
+

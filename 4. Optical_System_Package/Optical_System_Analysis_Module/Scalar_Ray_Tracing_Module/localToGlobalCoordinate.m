@@ -58,9 +58,9 @@ function [globalRayIntersectionPoint,globalExitRayPosition,globalSurfaceNormal,g
         toGlobalRotation = toLocalRotation';
 		% coordinates of Pj in the reference system
         globalRayIntersectionPoint = (toGlobalRotation*localRayIntersectionPoint + ...
-            repmat(surfGlobalPosition,[1,nRay]));
+            surfGlobalPosition*ones(1,nRay));%repmat(surfGlobalPosition,[1,nRay]));
         globalExitRayPosition = (toGlobalRotation*localExitRayPosition + ...
-            repmat(surfGlobalPosition,[1,nRay]));
+             surfGlobalPosition*ones(1,nRay));%repmat(surfGlobalPosition,[1,nRay]));
         
         globalSurfaceNormal = (toGlobalRotation*localSurfaceNormal);
         globalIncidentRayDirection = (toGlobalRotation*localIncidentRayDirection);

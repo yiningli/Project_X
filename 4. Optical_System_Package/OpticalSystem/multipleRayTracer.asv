@@ -56,7 +56,6 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
         considerPolarization = 0;
         considerSurfAperture = 1;
         recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
         endSurface = getNumberOfSurfaces(optSystem);
     elseif nargin == 3
         nRay1 = 3;
@@ -65,7 +64,6 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
         considerPolarization = 0;
         considerSurfAperture = 1;
         recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
         endSurface = getNumberOfSurfaces(optSystem);
     elseif nargin == 4
         nRay2 = 3;
@@ -73,35 +71,29 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
         considerPolarization = 0;
         considerSurfAperture = 1;
         recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
         endSurface = getNumberOfSurfaces(optSystem);
     elseif nargin == 5
         pupSamplingType ='Cartesian';
         considerPolarization = 0;
         considerSurfAperture = 1;
         recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
         endSurface = getNumberOfSurfaces(optSystem);
     elseif nargin == 6
         considerPolarization = 0;
         considerSurfAperture = 1;
         recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
         endSurface = getNumberOfSurfaces(optSystem);
     elseif nargin == 7
         considerSurfAperture = 1;
         recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
         endSurface = getNumberOfSurfaces(optSystem);
     elseif nargin == 8
         recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
         endSurface = getNumberOfSurfaces(optSystem);
     elseif nargin == 9
-        computeGroupPathLength = 0;
         endSurface = getNumberOfSurfaces(optSystem);
-    elseif nargin == 10
-        endSurface = getNumberOfSurfaces(optSystem);        
+    elseif nargin == 11
+        
     end
     
     tic
@@ -128,8 +120,7 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
     
     %===============RAYTRACE For Bundle of Ray========================
     rayTraceResult = rayTracer(optSystem,initialRayBundle,considerPolarization,...
-        considerSurfAperture,recordIntermediateResults,computeGroupPathLength,...
-        endSurface,nRayPupil,nField,nWav);
+        considerSurfAperture,recordIntermediateResults,endSurface,nRayPupil,nField,nWav);
     multipleRayTracerResult = rayTraceResult;
     pupilCoordinates = pupilSamplingPoints;
     timeElapsed =  toc;

@@ -54,6 +54,5 @@ function [ initialRayBundleDirections ] = computeInitialRayBundleDirections...
     % if pupil is to the left of field point, the ray direction should be
     % negated to get real ray.
     initialRayBundleDirections = rayDir./dirMag;
-%     initialRayBundleDirections = sign(rayDir(1,3))*rayDir./dirMag;
 end
 

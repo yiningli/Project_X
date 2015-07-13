@@ -45,7 +45,7 @@ function [localRayPosition,localRayDirection] = ...
         surfPosition = surfaceCoordinateTM(1:3,4);
         toLocalRotation = surfaceCoordinateTM(1:3,1:3); % from global to local
 
-		newTranslatedPosition = globalRayPosition - repmat(surfPosition,[1,nRay]);
+		newTranslatedPosition = globalRayPosition - surfPosition*ones(1,nRay);%repmat(surfPosition,[1,nRay]);
 		newTranslatedDirection = globalRayDirection;
         
 		localRayPosition = (toLocalRotation*newTranslatedPosition);

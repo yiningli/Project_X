@@ -1,4 +1,4 @@
-function [ surfaceArray ] = getSurfaceArray( optSystem,surfIndex )
+function [ surfaceArray, nSurface ] = getSurfaceArray( optSystem,surfIndex )
     %GETSURFACEARRAY Summary of this function goes here
     %   Detailed explanation goes here
     if nargin == 1
@@ -28,5 +28,6 @@ function [ surfaceArray ] = getSurfaceArray( optSystem,surfIndex )
     else
         surfaceArray = updatedSurfaceArray;
     end
+    nSurface = length(surfaceArray);
 end
 

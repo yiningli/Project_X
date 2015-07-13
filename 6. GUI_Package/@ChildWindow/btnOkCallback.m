@@ -12,18 +12,14 @@ function btnOkCallback(childWindow,parentWindow)
     % Click graph tab programatically
     set(childWindow.ChildHandles.mainTabGroup,'SelectedTab',...
         childWindow.ChildHandles.GraphTab);
-    %     ind = 2;
-    %     selectMainTab(childWindow,ind);
     try
         cla(childWindow.ChildHandles.axesHandle);
     catch
+        
     end
     % performs d/t actions based on myName
     handles = childWindow.ChildHandles;
-    %     [ optSystem,saved] = ...
-    %         getCurrentOpticalSystem(parentWindow) ;
-    [ optSystem,saved] = ...
-        getCurrentOpticalSystem(parentWindow) ;
+    [ optSystem,saved] = getCurrentOpticalSystem(parentWindow) ;
     
     % Group Similar windows
     coatingPropertyVsWavelength = ...
@@ -546,10 +542,6 @@ function btnOkCallback(childWindow,parentWindow)
                         % Click text tab programatically
                         set(childWindow.ChildHandles.mainTabGroup,'SelectedTab',...
                             childWindow.ChildHandles.TextTab);
-                        %
-                        %                         ind = 3;
-                        %                         childWindow.selectMainTab(ind);
-                        
                     end
                 case lower('polarizationRayTrace')
                     if isempty(rayTracerResult)||...
@@ -634,9 +626,6 @@ function btnOkCallback(childWindow,parentWindow)
                                 % Compute polVector after surf from initial
                                 % polarization vector
                                 polVector = computeFinalPolarizationVector(rayTracerResult(kk),initialPolVectorXYZ, wavLen);
-                                %                                 nRay = size(initialPolVectorXYZ,2);
-                                %                                 initialPolVectorReshaped = reshape(initialPolVectorXYZ,3,1,nRay);
-                                %                                 polVector = multiplySliced3DMatrices( totalPMatrix,initialPolVectorReshaped );
                                 ellipseParameter = computeEllipseParameters( polVector);
                                 
                                 rayTraceResultSeqText = char(rayTraceResultSeqText,...
@@ -694,8 +683,6 @@ function btnOkCallback(childWindow,parentWindow)
                         % Click text tab programatically
                         set(childWindow.ChildHandles.mainTabGroup,'SelectedTab',...
                             childWindow.ChildHandles.TextTab);
-                        %                         ind = 3;
-                        %                         childWindow.selectMainTab(ind);
                     end
             end
             
@@ -1028,8 +1015,6 @@ function btnOkCallback(childWindow,parentWindow)
                     % Click text tab programatically
                     set(childWindow.ChildHandles.mainTabGroup,'SelectedTab',...
                         childWindow.ChildHandles.TextTab);
-                    %                     ind = 3;
-                    %                     childWindow.selectMainTab(ind);
                 case lower('GDDVsWavelength')
                     % Read pilot ray parameters
                     % Read Hx,Hy,Px,Py and Wavelegth
@@ -1080,7 +1065,6 @@ function btnOkCallback(childWindow,parentWindow)
                     maxWavelength = str2double(get(handles.txtMaxWavelength,'String'));
                     wavelengthStep = str2double(get(handles.txtWavelengthStep,'String'));
                     
-                    %                     wavUnitFactor = getWavelengthUnitFactor(optSystem);
                     wavUnitFactor = 10^-6;
                     minWavelengthInM = minWavelength*wavUnitFactor;
                     maxWavelengthInM = maxWavelength*wavUnitFactor;
@@ -1260,7 +1244,6 @@ function btnOkCallback(childWindow,parentWindow)
                     plotPhaseAndPulseFrontEvolution( ...
                         optSystem, wavLen,fieldPointXY, surfIndex, deltaTime,...
                         numberOfTimeSamples,numberOfRays1,numberOfRays2,PupSamplingType,plotIn2D,handles.axesHandle )
-                    
                     
                 case lower('FFTFocusedPulse')
                     

@@ -1,4 +1,4 @@
-function [ NonDummySurfaceIndices,surfaceArray,nSurface ] = getNonDummySurfaceIndices( optSystem )
+function [ NonDummySurfaceIndices,nSurface, surfaceArray ] = getNonDummySurfaceIndices( optSystem )
 %getNonDummySurfaceIndices Returns the surface array which are not dummy
 [nSurface, surfaceArray ] = getNumberOfSurfaces(optSystem);
 NonDummySurfaceIndices = [];

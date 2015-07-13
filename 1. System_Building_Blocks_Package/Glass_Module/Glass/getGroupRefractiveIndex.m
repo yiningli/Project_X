@@ -1,6 +1,8 @@
-function [ groupIndex ] = getGroupRefractiveIndex( glass,wavLen )
+function [ groupIndex,refractiveIndex, refractiveIndex_FirstDerivative ] = getGroupRefractiveIndex( glass,wavLen )
     % GETGROUPREFRACTIVEINDEX Computes the group refractive index of the glass
-    % for the pulse with central wavelength given.
+    % for the pulse with central wavelength given. In addition to the group
+    % index the function also returns the refractive index and its first
+    % derivative as they are part of the computation. 
     % Formula used: Group_Index = n(wavLen) + wavLen*dn/dwavLen
     
     % Inputs:
@@ -18,7 +20,8 @@ function [ groupIndex ] = getGroupRefractiveIndex( glass,wavLen )
     % <<<<<<<<<<<<<<<<<<< Change History Section >>>>>>>>>>>>>>>>>>>>>>>>>>
     % Date----------Modified By ---------Modification Detail--------Remark
     % Jun 17,2015   Worku, Norman G.     Original Version
-
-    groupIndex = getRefractiveIndex(glass,wavLen,0) - (wavLen).*getRefractiveIndex(glass,wavLen,1);    
+    refractiveIndex = getRefractiveIndex(glass,wavLen,0);
+    refractiveIndex_FirstDerivative = getRefractiveIndex(glass,wavLen,1);
+    groupIndex = refractiveIndex - (wavLen).*refractiveIndex_FirstDerivative;
 end
 

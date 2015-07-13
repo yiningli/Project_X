@@ -62,16 +62,12 @@ profile on
     
     objectRay = objectRayMatrix(:);
     % Determine the start and end indeces in non dummy surface array
-%     [surfaceArray,nSurface, nonDummySurfaceArray, nonDummySurfaceArray,...
-%         nonDummySurfaceIndices, nNonDummySurface] = getSurfaceArrayAllInformation(optSystem);
-   
-[ NonDummySurfaceArray,nNonDummySurface,NonDummySurfaceIndices,...
-        surfaceArray,nSurface ] = getNonDummySurfaceArray( optSystem );  
-    
-%     nSurface = getNumberOfSurfaces(optSystem);
-%     nNonDummySurface = getNumberOfNonDummySurfaces(optSystem);
-%     NonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
-%     NonDummySurfaceIndices = getNonDummySurfaceIndices(optSystem);
+    [surfaceArray,nSurface, nonDummySurfaceArray, nonDummySurfaceArray,...
+        nonDummySurfaceIndices, nNonDummySurface] = getSurfaceArrayAllInformation(optSystem);
+    nSurface = getNumberOfSurfaces(optSystem);
+    nNonDummySurface = getNumberOfNonDummySurfaces(optSystem);
+    NonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
+    NonDummySurfaceIndices = getNonDummySurfaceIndices(optSystem);
     
     startNonDummyIndex = 1;
     indicesBeforeEndSurf = find(NonDummySurfaceIndices<=endSurface);
@@ -117,15 +113,13 @@ profile on
     
     RayIntersectionPoint = CurrentRayPosition;
     ExitRayPosition = CurrentRayPosition;
-    IncidentRayDirection = [NaN;NaN;NaN]*ones(1,nRay);%repmat([NaN;NaN;NaN],[1,nRay]); % no ray is incident to object surface
+    IncidentRayDirection = repmat([NaN;NaN;NaN],[1,nRay]); % no ray is incident to object surface
     ExitRayDirection = CurrentRayDirection;
     
     SurfaceNormal = currentSurfaceNormal; % [0,0,1]; % assume plane object surface.
-    
     IncidenceAngle = NaN([1,nRay]);
     ExitAngle = computeAngleBetweenVectors...
         (currentSurfaceNormal,CurrentRayDirection);
-    
     PathLength = zeros([1,nRay]);
     OpticalPathLength = zeros([1,nRay]);
     % Absorption can be added here in the future

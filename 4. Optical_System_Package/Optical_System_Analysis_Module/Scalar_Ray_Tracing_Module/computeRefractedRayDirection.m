@@ -40,8 +40,8 @@ function [refLocalRayDirection,TIR] = computeRefractedRayDirection ...
         %  normalize s if the mag is d/t from unity but now both incident
         %  directions and surface normals are assumed to be unit vectors!!
         edots = compute3dDot(e,s);
-
-        sp = repmat(u,[3,1]).*s+repmat((-u.*edots+sqrt(1-(u.^2).*(1-edots.^2))),[3,1]).*e;
+        sp = (ones(3,1)*u).*s + (ones(3,1)*(-u.*edots+sqrt(1-(u.^2).*(1-edots.^2)))).*e;
+        %sp = repmat(u,[3,1]).*s+repmat((-u.*edots+sqrt(1-(u.^2).*(1-edots.^2))),[3,1]).*e;
         refLocalRayDirection = sp ;
         TIR = zeros([1,nRay]);
 
