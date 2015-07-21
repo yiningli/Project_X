@@ -97,7 +97,7 @@ classdef Surface
             NewSurface.Type = surfType;
             NewSurface.Thickness = 5;
             NewSurface.Glass = Glass();
-            [fieldNames,fieldFormat,defaultUniqueParamStruct] = NewSurface.getDefaultUniqueParameters;
+            [fieldNames,fieldFormat,defaultUniqueParamStruct] = getSurfaceUniqueParameters(surfType);
             NewSurface.UniqueParameters = defaultUniqueParamStruct;
             NewSurface.ExtraData  = [];
             NewSurface.Aperture = Aperture();

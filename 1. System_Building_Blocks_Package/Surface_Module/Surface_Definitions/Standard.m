@@ -195,7 +195,7 @@ function [ returnDataStruct] = Standard(returnFlag,surfaceParameters,inputDataSt
             % file
             gratingAdditionalPath = (rayPosition(2,:).*wavlenInM*(surfaceDiffractionOrder)*surfaceGratingLineDensity*10^6)./indexBefore;
             % currently the additional path due to grating is ignored
-            gratingAdditionalPath = 0; % Not sure
+            gratingAdditionalPath = zeros(1,size(rayPosition,2));
             additionalPathLength = gratingAdditionalPath; % Since rayPosition is in lens units
             %% Intersection point calculation
             % For standard surfaces the intersection points can be easily
@@ -282,7 +282,7 @@ function surfaceNormal = computeStandardSurfaceNormal...
             curv = 1/(surfaceRadius);
             normal = [-curv*intersectionPoint(1,:);-curv*intersectionPoint(2,:);...
                 1-curv*intersectionPoint(3,:)];
-            surfaceNormal = normal./ones(3,1)*sum(normal.^2,1);%repmat(sum(normal.^2,1),[3,1]);
+            surfaceNormal = normal./(ones(3,1)*sum(normal.^2,1));%repmat(sum(normal.^2,1),[3,1]);
         case 'Conic Aspherical'
             curv = 1/(surfaceRadius);
             denom = (sqrt(1-2*curv*surfaceConic*intersectionPoint(3,:) + ...

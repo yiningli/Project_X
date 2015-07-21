@@ -1,7 +1,6 @@
 function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
         multipleRayTracer(optSystem,wavLenInWavUnit,fieldPointXYInLensUnit,...
-        nRay1,nRay2,pupSamplingType,considerPolarization,considerSurfAperture,...
-        recordIntermediateResults,computeGroupPathLength,endSurface) %
+        nRay1,nRay2,pupSamplingType,rayTraceOptionStruct,endSurface) %
     % Trace bundle of rays through an optical system based on the pupil
     % sampling specified. Multiple rays can be defined with wavLenInWavUnit (1XnWav),
     % fieldPointXYInLensUnit (2XnField) and the total number of ray will be nRay*nWav*nField
@@ -12,7 +11,6 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
     % <<<<<<<<<<<<<<<<<<<<<<<<< Author Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>
     %   Written By: Worku, Norman Girma
     %   Advisor: Prof. Herbert Gross
-    %   Part of the RAYTRACE_TOOLBOX V3.0 (OOP Version)
     %	Optical System Design and Simulation Research Group
     %   Institute of Applied Physics
     %   Friedrich-Schiller-University of Jena
@@ -38,11 +36,8 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
         nRay1 = 3;
         nRay2 = 3;
         pupSamplingType = 'Cartesian';
-        considerPolarization = 0;
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
+        rayTraceOptionStruct = RayTraceOptionStruct();
+        [NonDummySurfaceIndices,updatedSurfaceArray,endSurface] = getNonDummySurfaceIndices(optSystem);    
     elseif nargin == 2
         % Take all field points and given wavelength
         nField = optSystem.getNumberOfFieldPoints;
@@ -53,62 +48,39 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
         nRay1 = 3;
         nRay2 = 3;
         pupSamplingType ='Cartesian';
-        considerPolarization = 0;
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
+        rayTraceOptionStruct = RayTraceOptionStruct();
+        [NonDummySurfaceIndices,updatedSurfaceArray,endSurface] = getNonDummySurfaceIndices(optSystem);    
     elseif nargin == 3
         nRay1 = 3;
         nRay2 = 3;
         pupSamplingType ='Cartesian';
-        considerPolarization = 0;
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
+        rayTraceOptionStruct = RayTraceOptionStruct();
+        [NonDummySurfaceIndices,updatedSurfaceArray,endSurface] = getNonDummySurfaceIndices(optSystem);    
     elseif nargin == 4
         nRay2 = 3;
         pupSamplingType ='Cartesian';
-        considerPolarization = 0;
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
+        rayTraceOptionStruct = RayTraceOptionStruct();
+        [NonDummySurfaceIndices,updatedSurfaceArray,endSurface] = getNonDummySurfaceIndices(optSystem);    
     elseif nargin == 5
         pupSamplingType ='Cartesian';
-        considerPolarization = 0;
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
+        rayTraceOptionStruct = RayTraceOptionStruct();
+        [NonDummySurfaceIndices,updatedSurfaceArray,endSurface] = getNonDummySurfaceIndices(optSystem);    
     elseif nargin == 6
-        considerPolarization = 0;
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
+        rayTraceOptionStruct = RayTraceOptionStruct();
+        [NonDummySurfaceIndices,updatedSurfaceArray,endSurface] = getNonDummySurfaceIndices(optSystem);    
     elseif nargin == 7
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
-    elseif nargin == 8
-        recordIntermediateResults = 0;
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
-    elseif nargin == 9
-        computeGroupPathLength = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
-    elseif nargin == 10
-        endSurface = getNumberOfSurfaces(optSystem);        
+        [NonDummySurfaceIndices,updatedSurfaceArray,endSurface] = getNonDummySurfaceIndices(optSystem); 
+    else
+        [NonDummySurfaceIndices,updatedSurfaceArray,endSurface] = getNonDummySurfaceIndices(optSystem); 
     end
     
     tic
+    %     % Update the surrface array
+    %     optSystem.SurfaceArray = updatedSurfaceArray;
+    %     optSystem.IsUpdatedSurfaceArray = 1;
     
     % Determine the number of non dummy surfaces used for ray tracing
     % That can be used for final reshaping of the ray trace result matrix.
-    NonDummySurfaceIndices = getNonDummySurfaceIndices(optSystem);
     startNonDummyIndex = 1; % Ray trace start from object surface
     indicesBeforeEndSurf = find(NonDummySurfaceIndices<=endSurface);
     endNonDummyIndex = indicesBeforeEndSurf(end);
@@ -127,12 +99,12 @@ function [multipleRayTracerResult,pupilMeshGrid,outsidePupilIndices ] = ...
     nRayPupil = size(pupilSamplingPoints,2);
     
     %===============RAYTRACE For Bundle of Ray========================
-    rayTraceResult = rayTracer(optSystem,initialRayBundle,considerPolarization,...
-        considerSurfAperture,recordIntermediateResults,computeGroupPathLength,...
+    rayTraceResult = rayTracer(optSystem,initialRayBundle,rayTraceOptionStruct,...
         endSurface,nRayPupil,nField,nWav);
     multipleRayTracerResult = rayTraceResult;
     pupilCoordinates = pupilSamplingPoints;
     timeElapsed =  toc;
+    considerPolarization = rayTraceOptionStruct.ConsiderPolarization;
     disp(['Ray Bundle Trace Completed. Polarized  = ',num2str(considerPolarization), ...
         ', Total Number  = ', num2str(nRayPupil*nField*nWav), ', Time Elapsed = ', ...
         num2str(timeElapsed)]);

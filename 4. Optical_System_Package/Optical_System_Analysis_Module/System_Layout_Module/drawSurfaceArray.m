@@ -110,9 +110,19 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
     apartDecX = zeros(nSurface,1);
     apartDecY = zeros(nSurface,1);
     for ss =  1:nSurface
-        if ss > 1
-            sameApertureType(ss-1) = strcmpi(surfaceArray(ss-1).Aperture.OuterShape,surfaceArray(ss).Aperture.OuterShape);
-            samegetGridType(ss-1) = strcmpi(getGridType(surfaceArray(ss-1)),getGridType(surfaceArray(ss)));
+        
+        if ss == 1
+            currentGridType = getGridType(surfaceArray(ss));
+            currentApertureOuterShape = surfaceArray(ss).Aperture.OuterShape;
+        else
+            prevGridType = currentGridType;
+            prevApertureOuterShape = currentApertureOuterShape;
+            
+            currentGridType = getGridType(surfaceArray(ss));
+            currentApertureOuterShape = surfaceArray(ss).Aperture.OuterShape;
+            
+            sameApertureType(ss-1) = strcmpi(prevApertureOuterShape,currentApertureOuterShape);
+            samegetGridType(ss-1) = strcmpi(prevGridType,currentGridType);
         end
         IsFreeSpace(ss) = (strcmpi(surfaceArray(ss).Glass.Name,'None')||...
             strcmpi(surfaceArray(ss).Glass.Name,'Air')||...
@@ -164,9 +174,17 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
                 
                 % Compute the single surface plot points from the xyzPoints1
                 if strcmpi(getGridType(surfaceArray(ss)),'Polar')
-                    singleSurfaceBoarderX{singleSurfaceCounter} = [xyzPoints1(1,:,1)];
-                    singleSurfaceBoarderY{singleSurfaceCounter} = [xyzPoints1(1,:,2)];
-                    singleSurfaceBoarderZ{singleSurfaceCounter} = [xyzPoints1(1,:,3)];
+                    if plotIn2D
+                        % Only one angle so take all r for that angle
+                        singleSurfaceBoarderX{singleSurfaceCounter} = [xyzPoints1(:,1,1)];
+                        singleSurfaceBoarderY{singleSurfaceCounter} = [xyzPoints1(:,1,2)];
+                        singleSurfaceBoarderZ{singleSurfaceCounter} = [xyzPoints1(:,1,3)];
+                    else
+                        % Take all R for maximum r
+                        singleSurfaceBoarderX{singleSurfaceCounter} = [xyzPoints1(1,:,1)];
+                        singleSurfaceBoarderY{singleSurfaceCounter} = [xyzPoints1(1,:,2)];
+                        singleSurfaceBoarderZ{singleSurfaceCounter} = [xyzPoints1(1,:,3)];
+                    end
                 else
                     singleSurfaceBoarderX{singleSurfaceCounter} = [xyzPoints1(1,:,1),(xyzPoints1(:,end,1))',fliplr(xyzPoints1(end,:,1)),fliplr((xyzPoints1(:,1,1))')];
                     singleSurfaceBoarderY{singleSurfaceCounter}  = [xyzPoints1(1,:,2),(xyzPoints1(:,end,2))',fliplr(xyzPoints1(end,:,2)),fliplr((xyzPoints1(:,1,2))')];
@@ -251,7 +269,7 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
                 surfacePointsComputedFlag(ss) = 1;
             else
                 % Compute the surface plot points just for the computation of the singlet border
-                xyzPoints1 = surfaceArray(ss).drawSurface(plotIn2D,nPoints1,nPoints2,...
+                xyzPoints1 = drawSurface(surfaceArray(ss),plotIn2D,nPoints1,nPoints2,...
                     -1,surfColor(ss,:),2*drawnApertureRadiusXY(ss,:));
             end
             if surfaceArray(ss+1).Aperture.DrawAbsolute
@@ -269,15 +287,26 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
             % Compute the singlet boarder surface plot points from the
             % xyzPoints1 and xyzPoints2
             if strcmpi(getGridType(surfaceArray(ss)),'Polar')
-                singletBoarderX{singletCounter} = [xyzPoints2(end,:,1);xyzPoints1(end,:,1)];
-                singletBoarderY{singletCounter} = [xyzPoints2(end,:,2);xyzPoints1(end,:,2)];
-                singletBoarderZ{singletCounter} = [xyzPoints2(end,:,3);xyzPoints1(end,:,3)];
+                if plotIn2D
+                    % Only one angle so take all r for that angle
+                    singletBoarderX{singletCounter} = [xyzPoints2(:,end,1);flipud(xyzPoints1(:,end,1))];
+                    singletBoarderY{singletCounter} = [xyzPoints2(:,end,2);flipud(xyzPoints1(:,end,2))];
+                    singletBoarderZ{singletCounter} = [xyzPoints2(:,end,3);flipud(xyzPoints1(:,end,3))];
+                else
+                    % Take all angle for maximum radius
+                    singletBoarderX{singletCounter} = [xyzPoints2(end,:,1);(xyzPoints1(end,:,1))];
+                    singletBoarderY{singletCounter} = [xyzPoints2(end,:,2);(xyzPoints1(end,:,2))];
+                    singletBoarderZ{singletCounter} = [xyzPoints2(end,:,3);(xyzPoints1(end,:,3))];
+                end
             else
-                singletBoarderX{singletCounter} = [xyzPoints2(1,:,1),(xyzPoints2(:,end,1))',fliplr(xyzPoints2(end,:,1)),fliplr((xyzPoints2(:,1,1))');...
+                singletBoarderX{singletCounter} = ...
+                    [xyzPoints2(1,:,1),(xyzPoints2(:,end,1))',fliplr(xyzPoints2(end,:,1)),fliplr((xyzPoints2(:,1,1))');...
                     xyzPoints1(1,:,1),(xyzPoints1(:,end,1))',fliplr(xyzPoints1(end,:,1)),fliplr((xyzPoints1(:,1,1))')];
-                singletBoarderY{singletCounter}  = [xyzPoints2(1,:,2),(xyzPoints2(:,end,2))',fliplr(xyzPoints2(end,:,2)),fliplr((xyzPoints2(:,1,2))');...
+                singletBoarderY{singletCounter}  = ...
+                    [xyzPoints2(1,:,2),(xyzPoints2(:,end,2))',fliplr(xyzPoints2(end,:,2)),fliplr((xyzPoints2(:,1,2))');...
                     xyzPoints1(1,:,2),(xyzPoints1(:,end,2))',fliplr(xyzPoints1(end,:,2)),fliplr((xyzPoints1(:,1,2))')];
-                singletBoarderZ{singletCounter}  = [xyzPoints2(1,:,3),(xyzPoints2(:,end,3))',fliplr(xyzPoints2(end,:,3)),fliplr((xyzPoints2(:,1,3))');...
+                singletBoarderZ{singletCounter}  = ...
+                    [xyzPoints2(1,:,3),(xyzPoints2(:,end,3))',fliplr(xyzPoints2(end,:,3)),fliplr((xyzPoints2(:,1,3))');...
                     xyzPoints1(1,:,3),(xyzPoints1(:,end,3))',fliplr(xyzPoints1(end,:,3)),fliplr((xyzPoints1(:,1,3))')];
             end
         end
@@ -287,13 +316,12 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
     if plotIn2D
         % Plot singlets
         for ss = 1:singletCounter
-            surf(axesHandle,[singletBoarderZ{ss}],[singletBoarderY{ss}],[singletBoarderX{ss}],...
-                'facecolor',0.5*(surfColor(ss,:)+surfColor(ss,:)),'edgecolor','none','FaceAlpha', 0.99);
+            patch([singletBoarderZ{ss}],[singletBoarderY{ss}],[singletBoarderX{ss}],'Parent',axesHandle,'FaceColor',surfColor(ss,:));
             hold(axesHandle,'on');
         end
         % Plot single surfaces
         for ss = 1:singleSurfaceCounter
-            plot(axesHandle,[singleSurfaceBoarderZ{ss}],[singleSurfaceBoarderY{ss}],'Color',surfColor(ss,:));%[singleSurfaceBoarderX(:,:,ss)]
+            plot(axesHandle,[singleSurfaceBoarderZ{ss}],[singleSurfaceBoarderY{ss}],'Color',surfColor(ss,:));
             hold(axesHandle,'on');
         end
         view(axesHandle,[0,-1,1]);
@@ -303,15 +331,15 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
             xyzPointsCurrent = xyzPoints{ss};
             x = xyzPointsCurrent(:,:,1);
             y = xyzPointsCurrent(:,:,2);
-            z = xyzPointsCurrent(:,:,3);    %surfColor(ss,:)
-            surf(axesHandle,x,z,y,z+35,'facecolor','interp',...
+            z = xyzPointsCurrent(:,:,3);
+            surf(axesHandle,x,z,y,z+35,'Facecolor','interp',...
                 'edgecolor','none','FaceAlpha', 0.6);
             hold(axesHandle,'on');
         end
         % Plot the edges for matching singlets with slightly darker color
         for ss = 1:singletCounter
             surf(axesHandle,[singletBoarderX{ss}],[singletBoarderZ{ss}],[singletBoarderY{ss}],...
-                'facecolor',surfColor(ss,:)/1.2,'edgecolor','none','facelighting','phong','FaceAlpha', 0.5,'AmbientStrength', 0., 'SpecularStrength', 1);
+                'facecolor',surfColor(ss,:)/1.5,'edgecolor','none','facelighting','phong','FaceAlpha', 0.5,'AmbientStrength', 0., 'SpecularStrength', 1);
             hold(axesHandle,'on');
         end
     end
@@ -341,5 +369,5 @@ function [ xyzPoints,centerPoints] = drawSurfaceArray...
     end
     axis equal
     hold off;
-    camlight
+    %     camlight
     lighting gouraud

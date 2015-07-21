@@ -59,8 +59,11 @@ function [ returnData1, returnData2, returnData3 ] = IdealNonDispersive(...
         case 2 % Return the refractive index of given derivative order
             nWav = size(wavelength,2);
             refWavLen = glassParameters.ReferenceWavelength;
-            n = glassParameters.RefractiveIndex;
-            
+            if derivativeOrder == 0
+                n = glassParameters.RefractiveIndex;
+            else
+                n = 0;
+            end
             % constant refractive index for all wavelengths           
             returnData1 = n*ones(1,nWav); % refractive index
             returnData2 = NaN; % 

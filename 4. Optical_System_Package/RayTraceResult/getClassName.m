@@ -1,18 +1,18 @@
-function [ pathLengths ] = getAllSurfacePathLength( allSurfaceRayTraceResult,...
+function [ classNames ] = getClassName( allSurfaceRayTraceResult,...
         rayPupilIndices,rayFieldIndices,rayWavelengthIndices)
-    %getAllSurfacePathLength: Returns the exit ray direction of a specific
+    %getAllSurfaceClassName: Returns the exit ray direction of a specific
     % ray specified by (rayPupilIndex,rayFieldIndex,rayWavIndex) for all surfaces
     % Input:
     %   allSurfaceRayTraceResult: vector of raytrace result (size = nSurf)
     %   (rayPupilIndex,rayFieldIndex,rayWavIndex) : Indices specifying a given
     %   ray
     % Output:
-    %   pathLengths: is (1 X nSurface X nPupilPointsRequested X nFieldRequested X nWavRequested)
+    %   classNames: is (1 X nSurface X nPupilPointsRequested X nFieldRequested X nWavRequested)
     
     if nargin == 0
-        disp(['Error: The function  getAllSurfacePathLength requires ',...
+        disp(['Error: The function  getAllSurfaceClassName requires ',...
             'atleast the surface trace result struct as argument.']);
-        pathLengths = NaN;
+        classNames = NaN;
         return;
     elseif nargin == 1
         rayPupilIndices = 0; % All
@@ -27,9 +27,9 @@ function [ pathLengths ] = getAllSurfacePathLength( allSurfaceRayTraceResult,...
         
     end
     
-    requestedResultFieldName = 'PathLength';
+    requestedResultFieldName = 'ClassName';
     requestedFieldFirstDim = 1;
-    pathLengths = getRayTraceResultFieldForAllSurfaces( ...
+    classNames = getRayTraceResultFieldForAllSurfaces( ...
         allSurfaceRayTraceResult,requestedResultFieldName,requestedFieldFirstDim,...
         rayPupilIndices,rayFieldIndices,rayWavelengthIndices);
 end

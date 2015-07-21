@@ -21,6 +21,7 @@ function [surfaceCoordinateTM,nextReferenceCoordinateTM] = TiltAndDecenter...
     
     % For detailed see the documentation of the
     % CoordinateTransformationMatrix function
+
     Tx = surf.Tilt(1);
     Ty = surf.Tilt(2);
     Tz = surf.Tilt(3);

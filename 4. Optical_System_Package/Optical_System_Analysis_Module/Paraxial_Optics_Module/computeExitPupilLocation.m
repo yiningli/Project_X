@@ -30,8 +30,10 @@ function [ pupilPosition ] = computeExitPupilLocation...
     
     ystop = 0;
     ustop = 0.01;
-    initialSurf = getStopSurfaceIndex(optSystem);
-    finalSurf = getNumberOfSurfaces(optSystem);
+    [stopIndex, specified,surfaceArray, nSurface] = getStopSurfaceIndex(optSystem);
+    initialSurf = stopIndex;
+    finalSurf = nSurface;
+    
     wavlenInM = getPrimaryWavelength(optSystem);
     [ yimg,uimg ] = paraxialRayTracer( optSystem,ystop,ustop,initialSurf,finalSurf,wavlenInM);
     % Then exit pupil position is where this object ray crosses the

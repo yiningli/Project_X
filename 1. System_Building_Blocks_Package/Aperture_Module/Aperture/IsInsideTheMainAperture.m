@@ -28,7 +28,12 @@ function [ isInsideTheMainAperture ] = IsInsideTheMainAperture( surfAperture, xy
     xyVector_Decenter = [xyVector(:,1) - apertDecX , xyVector(:,2) - apertDecY];
     
     initial_r = computeNormOfMatrix( xyVector_Decenter, 2 );
-    initial_angleInRad = atan(xyVector_Decenter(:,2)./xyVector_Decenter(:,1));
+    initial_angleInRad = atan(xyVector_Decenter(:,2)./(xyVector_Decenter(:,1) + eps));
+    % For case of xyVector_Decenter(:,1) == 0, add small number in the
+    % denominator to avoid NaN
+    nanCaseIndices = abs(xyVector_Decenter(:,1)) < eps;
+    initial_angleInRad(nanCaseIndices) = atan(xyVector_Decenter(nanCaseIndices,2)./(xyVector_Decenter(nanCaseIndices,1) + eps));
+    
     new_angleInRad = initial_angleInRad - apertRotInDeg*pi/180;
     
     xyVector_final = [initial_r.*cos(new_angleInRad), initial_r.*sin(new_angleInRad)];

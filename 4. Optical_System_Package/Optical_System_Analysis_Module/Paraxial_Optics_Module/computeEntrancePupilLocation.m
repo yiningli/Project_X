@@ -1,13 +1,6 @@
-function [ pupilPosition ] = computeEntrancePupilLocation...
-        (optSystem)
+function [ pupilPosition ] = computeEntrancePupilLocation(optSystem)
     % computeEntrancePupilLocation: compute the paraxial entrance pupil
     % position from first optical surface
-    
-    % <<<<<<<<<<<<<<<<<<<<<<< Algorithm Section>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    %
-    
-    % <<<<<<<<<<<<<<<<<<<<<<<<< Example Usage>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    %
     
     % <<<<<<<<<<<<<<<<<<<<<<<<< Author Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>
     %   Written By: Worku, Norman Girma

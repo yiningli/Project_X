@@ -199,20 +199,22 @@ function [ returnDataStruct] = IdealLens(returnFlag,surfaceParameters,inputDataS
             % using gaussian thin lens equation 1/f = -n/t+n'/t'
             % first compute the intersection of the lines with local z axis on
             % the object side
-            linePoint = rayPosition;
-            lineVector = rayDirection;
-            planePoint = [0,0,0]';
-            planeNormalVector = [0,1,0]';
-            [objectSideZAxisIntersection,distance] = computeLinePlaneIntersection(...
-                linePoint,lineVector,planePoint,planeNormalVector);
-            thicknessBefore = objectSideZAxisIntersection(3,:);
+            
+            posXY = sqrt(localRayIntersectionPoint(1,:).^2 + localRayIntersectionPoint(2,:).^2);
+            dirXY = sqrt(rayDirection(1,:).^2 + rayDirection(2,:).^2);
+            
+            thicknessBefore = -((posXY)./(dirXY)).*sqrt(1-dirXY.^2);
+            thicknessBefore(dirXY == 0) = Inf;
             % compute image side intersection t'=(ft)/((-fn+t)*n')
             thicknessAfter = (focalLength)./((indexBefore.*focalLength./thicknessBefore + 1).*indexAfter);
             % now compute the new ray direction
-            dxAfter = -(rayPosition(1,:));
-            dyAfter = -(rayPosition(2,:));
+            dxAfter = -(localRayIntersectionPoint(1,:));
+            dyAfter = -(localRayIntersectionPoint(2,:));
             dzAfter = thicknessAfter;
             exitRayDirection = normalize2DMatrix([dxAfter;dyAfter;dzAfter],1);
+            % For thicknessAfter == Inf, the exit ray dire = parallel to z
+            % axis
+            exitRayDirection(3,abs(thicknessAfter) > 10^10) = 1;
             TIR = ones(1,size(exitRayDirection,2));
             
             localExitRayDirection = exitRayDirection;

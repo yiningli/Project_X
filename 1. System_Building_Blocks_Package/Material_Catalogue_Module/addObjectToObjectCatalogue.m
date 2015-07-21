@@ -35,7 +35,7 @@ function [ addedPosition ] = addObjectToObjectCatalogue...
             Replace = 1;
     end
     
-    if ~strcmpi(class(object),objectType)
+    if ~strcmpi(object.ClassName,objectType)
         disp('Error: The object to be added and the catalogue type does not match.');
         addedPosition = 0;
         return;
@@ -46,7 +46,11 @@ function [ addedPosition ] = addObjectToObjectCatalogue...
         load(objectCatalogueFullName,'ObjectArray','FileInfoStruct');
         %check that the  Object doesnot exsist in the catalogue
         % Compare the existance of each object on the catalogue
-        existingObjectNames = {ObjectArray.Name};
+        if isempty(ObjectArray)
+            existingObjectNames = '';
+        else
+            existingObjectNames = {ObjectArray.Name};
+        end
         newObjectNames = {object.Name};
         % locations will be cell array of logicals arrays indicating exactly
         % where the new object name exists in the old catalogue

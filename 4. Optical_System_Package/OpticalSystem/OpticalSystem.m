@@ -15,7 +15,6 @@ function [NewOpticalSystem] =  OpticalSystem(fullFilePath)
         NewOpticalSystem.SurfaceArray = tempSurfaceArray;
         
         % Component array will be NaN for surface based defintion
-%         NewOpticalSystem.ComponentArray = Component.empty;
         NewOpticalSystem.ComponentArray = Component();
         
         NewOpticalSystem.SystemApertureType = 'ENPD';
@@ -31,10 +30,12 @@ function [NewOpticalSystem] =  OpticalSystem(fullFilePath)
         NewOpticalSystem.FieldType = 'ObjectHeight';   % object height
         NewOpticalSystem.FieldPointMatrix = [0 0 1];
         
-        NewOpticalSystem.ObjectAfocal = 0;
-        NewOpticalSystem.ImageAfocal = 0;
-        NewOpticalSystem.ObjectTelecenteric = 0;
-        NewOpticalSystem.ObjectTelecenteric = 0;
+        NewOpticalSystem.IsObjectAfocal = 0;
+        NewOpticalSystem.IsImageAfocal = 0;
+        NewOpticalSystem.IsObjectTelecenteric = 0;
+        NewOpticalSystem.IsObjectTelecenteric = 0;
+        
+        NewOpticalSystem.IsUpdatedSurfaceArray = 0;
         
         NewOpticalSystem.CoatingCataloguesList =  getAllObjectCatalogues('Coating');
         

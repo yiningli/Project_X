@@ -7,14 +7,14 @@ function [ meshGridX,meshGridY,pulseFront] =...
 
 c = 299792458;
 PupSamplingType = gridType;
-considerSurfAperture = 1;
-recordIntermediateResults = 1;
-considerPolarization = 0;
+rayTraceOptionStruct = RayTraceOptionStruct();
+rayTraceOptionStruct.ConsiderSurfAperture = 1;
+rayTraceOptionStruct.ConsiderPolarization = 0;
+rayTraceOptionStruct.RecordIntermediateResults = 1;
 
 [rayTracerResult,pupilMeshGrid,outsidePupilIndices] = ...
     multipleRayTracer(optSystem,wavLenInWavUnit,fieldPointXYInLensUnit,nSamplingPoints1,...
-    nSamplingPoints2,PupSamplingType,considerPolarization,considerSurfAperture,...
-    recordIntermediateResults);
+    nSamplingPoints2,PupSamplingType,rayTraceOptionStruct);
 X = pupilMeshGrid(:,:,1);
 Y = pupilMeshGrid(:,:,2);
 if isempty(outsidePupilIndices)
@@ -34,7 +34,8 @@ cheifRayIndex = cheifRayIndex(1);
 % nextSurfaceIndex = surfacesAfterCurrentPoint(1);
 
 % Determine the surface just before the requested distance
-totalPathLengthVector = [rayTracerResult(:,cheifRayIndex).TotalPathLength];
+% totalPathLengthVector = [rayTracerResult(:,cheifRayIndex).TotalPathLength];
+totalPathLengthVector = getAllSurfaceTotalGeometricalPathLength(rayTracerResult,cheifRayIndex,1,1);
 
 %surfacesBeforeCurrentPoint = find(totalPathLengthVector <= locationOfPhaseFrontAlongChiefRay);
 %prevSurfaceIndex = surfacesBeforeCurrentPoint(end);
@@ -50,22 +51,31 @@ else
     prevSurfaceIndex = refSurfaceIndex-1; 
 end
 wavLenInSI = wavLenInWavUnit * getWavelengthUnitFactor(optSystem);
-currentRefractiveIndex = optSystem.getSurfaceArray(prevSurfaceIndex).Glass.getRefractiveIndex(wavLenInSI);
-currentGroupRefractiveIndex = optSystem.getSurfaceArray(prevSurfaceIndex).Glass.getGroupRefractiveIndex(wavLenInSI);
+prevSurface = getSurfaceArray(optSystem,prevSurfaceIndex);
+currentRefractiveIndex = getRefractiveIndex(prevSurface.Glass,wavLenInSI);
+currentGroupRefractiveIndex = getGroupRefractiveIndex(prevSurface.Glass,wavLenInSI);
 locationOfPhaseFrontAlongChiefRay = totalPathLengthVector(refSurfaceIndex)+...
     (c*offsetInTime)/(getLensUnitFactor(optSystem));
 
 % Compute the points on each ray with equal group pathlength
-totalOpticalPathLengthToPhaseFront = (rayTracerResult(prevSurfaceIndex,cheifRayIndex).TotalOpticalPathLength)+...
-    (locationOfPhaseFrontAlongChiefRay-rayTracerResult(prevSurfaceIndex,cheifRayIndex).TotalPathLength)*currentRefractiveIndex;
+totalOPLToPrevSurf = getAllSurfaceTotalOpticalPathLength(rayTracerResult(prevSurfaceIndex),0,0,0);
+totalGeoPLToPrevSurf = getAllSurfaceTotalGeometricalPathLength(rayTracerResult(prevSurfaceIndex),0,0,0);
+totalGroupPLToPrevSurf = getAllSurfaceTotalGroupPathLength(rayTracerResult(prevSurfaceIndex),0,0,0);
+
+rayIntersectionPointWithPrevSurf = getAllSurfaceRayIntersectionPoint(rayTracerResult(prevSurfaceIndex),0,0,0);
+rayExitDirectionFromPrevSurf = getAllSurfaceExitRayDirection(rayTracerResult(prevSurfaceIndex),0,0,0);
+
+
+totalOpticalPathLengthToPhaseFront = totalOPLToPrevSurf(cheifRayIndex) + ...
+    (locationOfPhaseFrontAlongChiefRay-totalGeoPLToPrevSurf(cheifRayIndex))*currentRefractiveIndex;
 % In the same time the pulse group can travel a group path length = the
 % optical path length traveled by the light
 totalGroupPathLengthToPulseFront = totalOpticalPathLengthToPhaseFront;
 
 distanceFromLastSurfaceToPulseFront = (totalGroupPathLengthToPulseFront-...
-    [rayTracerResult(prevSurfaceIndex,:).TotalGroupPathLength])/currentGroupRefractiveIndex;
-pointsOfThePulseFront =  [rayTracerResult(prevSurfaceIndex,:).RayIntersectionPoint]+...
-    repmat(distanceFromLastSurfaceToPulseFront,[3,1]).*[rayTracerResult(prevSurfaceIndex,:).ExitRayDirection];
+    totalGroupPLToPrevSurf)/currentGroupRefractiveIndex;
+pointsOfThePulseFront =  rayIntersectionPointWithPrevSurf + ...
+    repmat(distanceFromLastSurfaceToPulseFront,[3,1]).*rayExitDirectionFromPrevSurf;
 
 
 %% Plot the pulse front

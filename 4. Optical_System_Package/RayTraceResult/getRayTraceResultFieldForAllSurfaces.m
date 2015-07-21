@@ -44,7 +44,7 @@ function [ rayTraceResultFieldForAllSurfaces ] = ...
     
     % Reshape to (nPupilPointsTotal X nFieldTotal X nWavelengthTotal)
     rayTraceResultForAllRaysReshaped = reshape(rayTraceResultForAllRays,...
-        requestedFieldFirstDims,nPupilPointsTotal,nFieldTotal,nWavelengthTotal,nSurfaceTotal);
+        [requestedFieldFirstDims,nPupilPointsTotal,nFieldTotal,nWavelengthTotal,nSurfaceTotal]);
     
     % Extract and return the requested values
     if rayPupilIndices == 0

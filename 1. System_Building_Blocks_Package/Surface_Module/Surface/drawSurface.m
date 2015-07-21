@@ -24,7 +24,8 @@ function [xyzPoints] = drawSurface(surface,plotIn2D,nPoints1,nPoints2,...
     
     % <<<<<<<<<<<<<<<<<<<<< Main Code Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     if nargin > 0
-        if strcmpi(getGridType(surface),'Polar')
+        gridType = getGridType(surface);
+        if strcmpi(gridType,'Polar')
             nPoints1Default = 64;
             nPoints2Default = 64;
             % nPoints1Default = 44;
@@ -136,7 +137,7 @@ function [xyzPoints] = drawSurface(surface,plotIn2D,nPoints1,nPoints2,...
     maxR = sqrt((apartRadiusXDrawn)^2+(apartRadiusYDrawn)^2);
     
     
-    if strcmpi(getGridType(surface),'Polar')
+    if strcmpi(gridType,'Polar')
         % Radius of the largest circle circumscribing the aperture
         maxR = sqrt((apartRadiusXDrawn)^2+(apartRadiusYDrawn)^2);
         % Draw a circle with radiaus maxR and then cut out the part required
@@ -145,12 +146,14 @@ function [xyzPoints] = drawSurface(surface,plotIn2D,nPoints1,nPoints2,...
         r = (linspace(-maxR,maxR,nPoints1))';
         if plotIn2D
             phi = pi/2;
+            xMesh = r*0;
+            yMesh = r*1;
         else
             % Any section size can be plotted.
             phi = (linspace(-pi,sectionDrawn*pi,nPoints2));
+            xMesh = r*cos(phi);
+            yMesh = r*sin(phi);
         end
-        xMesh = r*cos(phi);
-        yMesh = r*sin(phi);
     else
         xgv = linspace(-maxR,maxR,nPoints1);
         ygv = linspace(-maxR,maxR,nPoints2);
@@ -180,15 +183,16 @@ function [xyzPoints] = drawSurface(surface,plotIn2D,nPoints1,nPoints2,...
     
     % First decenter and then rotate the given points
     xyVector_Decenter = [xyVector(:,1) + apertDecX , xyVector(:,2) + apertDecY];
-    rotationMatrix = [cos(apertRotInrad) -sin(apertRotInrad);sin(apertRotInrad) cos(apertRotInrad)];
-    matrix1 = rotationMatrix;
-    matrix2 = reshape(xyVector_Decenter',[2,1,size(xyVector_Decenter,1)]);
+    rotationMatrix = [cos(apertRotInrad), -sin(apertRotInrad);sin(apertRotInrad), cos(apertRotInrad)];
     
-    [ product3DMatrix ] = multiplySliced3DMatrices( matrix1,matrix2 );
-    xyVector_final = (squeeze(product3DMatrix))';
-    
-    xfMesh = reshape(xyVector_final(:,1),[nRow,nCol]);
-    yfMesh = reshape(xyVector_final(:,2),[nRow,nCol]);
+
+    if isequal(rotationMatrix,eye(2))
+        xyVector_final1 = (xyVector)';
+    else
+        xyVector_final1 = rotationMatrix*(xyVector)';
+    end
+    xfMesh = reshape(xyVector_final1(1,:),[nRow,nCol]);
+    yfMesh = reshape(xyVector_final1(2,:),[nRow,nCol]);
     
     xyCoordinateMeshGrid = cat(3,xfMesh,yfMesh);
     [ surfaceSag1,surfaceSag2 ] = getSurfaceSag(surface,xyCoordinateMeshGrid,...
@@ -211,25 +215,18 @@ function [xyzPoints] = drawSurface(surface,plotIn2D,nPoints1,nPoints2,...
     yfMesh(~any(insideSurf,2),:) = [];
     zfMesh(~any(insideSurf,2),:) = [];
     
-    xyzPointsLocal(1,:,:) = xfMesh;
-    xyzPointsLocal(2,:,:) = yfMesh;
-    xyzPointsLocal(3,:,:) = zfMesh;
+    % nRay x 3 matrix
+    if isequal(surfRotation,eye(3))
+        xyzPointsRotated  = cat(3,xfMesh,yfMesh,zfMesh);
+    else
+        dim1 = size(xfMesh,1);
+        dim2 = size(xfMesh,2);
+        xyzPointsLocal = cat(2,xfMesh(:),yfMesh(:),zfMesh(:));
+        xyzPointsRotated_temp = xyzPointsLocal *surfRotation;
+        xyzPointsRotated = reshape(xyzPointsRotated_temp,[dim1,dim2,3]);
+    end
     
-    %     xyzPointsLocal = cat(1,xfMesh,yfMesh,zfMesh);
     
-    % Multiply each points with rotation matrix. This can be done by
-    % using the functions NUM2CELL to break the matrix xyzPointsLocal
-    % into a cell matrix with each cell containg x,y,z values and
-    % CELLFUN to operate across the cells. Then finally convert to
-    % number matrix.
-    cellArray = num2cell(xyzPointsLocal,[1]);
-    Z = cellfun(@(p) p'*surfRotation,cellArray,'UniformOutput',false);
-    Zn = cell2mat(squeeze(Z));
-    xRot = (Zn(:,1:3:end));
-    yRot = (Zn(:,2:3:end));
-    zRot = (Zn(:,3:3:end));
-    
-    xyzPointsRotated = cat(3,xRot,yRot,zRot);
     xyzPointsTranslated(:,:,1) = xyzPointsRotated(:,:,1) + surfPosition(1);
     xyzPointsTranslated(:,:,2) = xyzPointsRotated(:,:,2) + surfPosition(2);
     xyzPointsTranslated(:,:,3) = xyzPointsRotated(:,:,3) + surfPosition(3);

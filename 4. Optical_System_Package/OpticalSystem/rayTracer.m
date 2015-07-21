@@ -1,5 +1,4 @@
-function rayTracerResultReshaped = rayTracer(optSystem, objectRayMatrix,considerPolarization,...
-        considerSurfAperture,recordIntermediateResults,computeGroupPathLength,endSurface,nRayPupil,nField,nWav)
+function rayTracerResultReshaped = rayTracer(optSystem, objectRayMatrix,rayTraceOptionStruct,endSurface,nRayPupil,nField,nWav)
     % rayTracer: main function of polarized ray tracer from object surface to the
     % endSurface (inclusive)
     % The function is vectorized so it can work on multiple sets of
@@ -10,11 +9,14 @@ function rayTracerResultReshaped = rayTracer(optSystem, objectRayMatrix,consider
     %   startSurf,endSurf: Indices of start and end surface. ObjectRay is
     %   assumed to be given just after the start surface and it will be traced
     %   till end surface (inclusive)
+    %   rayTraceOptionStruct: struct with options indicating what to
+    %   compute and consider during ray trace. (See RayTraceOptionStruct()
+    %   function for more details)
     % Output:
     %   rayTracerResult: (array if all surface results are recorded) of "RayTraceResult" or can be
     %   matrix of RayTraceResult objects if the input is array of Ray
     %   object. Size : nSurface X nTotalRay
-
+    
     % <<<<<<<<<<<<<<<<<<<<<<<<< Author Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>
     %   Written By: Worku, Norman Girma
     %   Advisor: Prof. Herbert Gross
@@ -30,7 +32,7 @@ function rayTracerResultReshaped = rayTracer(optSystem, objectRayMatrix,consider
     %                                    results if not neccessary or stated
     % <<<<<<<<<<<<<<<<<<<<< Main Code Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     
-profile on
+%     profile on
     % Deafualt arguments
     if nargin < 2
         disp(['Error: Missing Input. The function rayTracer needs '...
@@ -38,40 +40,59 @@ profile on
         rayTracerResult = NaN;
         return;
     elseif nargin == 2
-        considerPolarization = 0;
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
+        rayTraceOptionStruct = RayTraceOptionStruct();
         endSurface = getNumberOfSurfaces(optSystem);
+        nRayPupil = 1;
+        nField = 1;
+        nWav = 1;
     elseif nargin == 3
-        considerSurfAperture = 1;
-        recordIntermediateResults = 0;
         endSurface = getNumberOfSurfaces(optSystem);
+        nRayPupil = 1;
+        nField = 1;
+        nWav = 1;
     elseif nargin == 4
-        recordIntermediateResults = 0;
-        endSurface = getNumberOfSurfaces(optSystem);
+        nRayPupil = 1;
+        nField = 1;
+        nWav = 1;
     elseif nargin == 5
-        
-        endSurface = getNumberOfSurfaces(optSystem);
+        nField = 1;
+        nWav = 1;
+    elseif nargin == 6
+        nWav = 1;
     else
         
     end
+    
+    considerPolarization = rayTraceOptionStruct.ConsiderPolarization;
+    recordIntermediateResults = rayTraceOptionStruct.RecordIntermediateResults;
+    considerSurfAperture = rayTraceOptionStruct.ConsiderSurfAperture;
+    
+    computeGeometricalPathLength = rayTraceOptionStruct.ComputeGeometricalPathLength;
+    computeOpticalPathLength = rayTraceOptionStruct.ComputeOpticalPathLength;
+    computeGroupPathLength = rayTraceOptionStruct.ComputeGroupPathLength;
+    
+    computeRefractiveIndex = rayTraceOptionStruct.ComputeRefractiveIndex;
+    computeRefractiveIndexFirstDerivative = rayTraceOptionStruct.ComputeRefractiveIndexFirstDerivative ;
+    computeRefractiveIndexSecondDerivative  = rayTraceOptionStruct.ComputeRefractiveIndexSecondDerivative ;
+    computeGroupIndex = rayTraceOptionStruct.ComputeGroupIndex;
+    
     
     % Determine the size of ObjectRay matrix so as to return rayTraceResult
     % array of the same matrix
     sizeOfInputObjectRay = size(objectRayMatrix);
     
-    objectRay = objectRayMatrix(:);
+    objectRayBundle = objectRayMatrix(:);
     % Determine the start and end indeces in non dummy surface array
-%     [surfaceArray,nSurface, nonDummySurfaceArray, nonDummySurfaceArray,...
-%         nonDummySurfaceIndices, nNonDummySurface] = getSurfaceArrayAllInformation(optSystem);
-   
-[ NonDummySurfaceArray,nNonDummySurface,NonDummySurfaceIndices,...
-        surfaceArray,nSurface ] = getNonDummySurfaceArray( optSystem );  
+    %     [surfaceArray,nSurface, nonDummySurfaceArray, nonDummySurfaceArray,...
+    %         nonDummySurfaceIndices, nNonDummySurface] = getSurfaceArrayAllInformation(optSystem);
     
-%     nSurface = getNumberOfSurfaces(optSystem);
-%     nNonDummySurface = getNumberOfNonDummySurfaces(optSystem);
-%     NonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
-%     NonDummySurfaceIndices = getNonDummySurfaceIndices(optSystem);
+    [ NonDummySurfaceArray,nNonDummySurface,NonDummySurfaceIndices,...
+        surfaceArray,nSurface ] = getNonDummySurfaceArray( optSystem );
+    
+    %     nSurface = getNumberOfSurfaces(optSystem);
+    %     nNonDummySurface = getNumberOfNonDummySurfaces(optSystem);
+    %     NonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
+    %     NonDummySurfaceIndices = getNonDummySurfaceIndices(optSystem);
     
     startNonDummyIndex = 1;
     indicesBeforeEndSurf = find(NonDummySurfaceIndices<=endSurface);
@@ -86,11 +107,15 @@ profile on
     wavUnitFactor = getWavelengthUnitFactor(optSystem);
     primaryWavlenInM = getPrimaryWavelength(optSystem);
     
-    nRay = length(objectRay);
-    wavlenInM  = [objectRay.Wavelength]; % wavlen is in m for Ray object
+%     nRay = length(objectRayBundle);
+    nRay = size(objectRayBundle.Position,2);
+    
+    wavlenInM  = objectRayBundle.Wavelength; % wavlen is in m for Ray object
     wavlenInWavlenUnit = wavlenInM/wavUnitFactor;
-    CurrentRayDirection = [objectRay.Direction];
-    currentRayPositionInM = [objectRay.Position];
+    CurrentRayDirection = objectRayBundle.Direction;
+    currentRayPositionInM = objectRayBundle.Position;
+%     currentRayPupilCoordinate = objectRayBundle.PupilCoordinate;
+    
     
     % Since all ray tracing is done in lens units convert the object position
     % from meter to lens unit.
@@ -122,12 +147,13 @@ profile on
     
     SurfaceNormal = currentSurfaceNormal; % [0,0,1]; % assume plane object surface.
     
-    IncidenceAngle = NaN([1,nRay]);
-    ExitAngle = computeAngleBetweenVectors...
-        (currentSurfaceNormal,CurrentRayDirection);
+    %     IncidenceAngle = NaN([1,nRay]);
+    %     ExitAngle = computeAngleBetweenVectors...
+    %         (currentSurfaceNormal,CurrentRayDirection);
     
-    PathLength = zeros([1,nRay]);
+    GeometricalPathLength = zeros([1,nRay]);
     OpticalPathLength = zeros([1,nRay]);
+    AdditionalPathLength = zeros([1,nRay]);
     % Absorption can be added here in the future
     
     GroupPathLength = zeros([1,nRay]);
@@ -148,47 +174,71 @@ profile on
         if recordIntermediateResults
             multipleRayTracerResultAll(startNonDummyIndex,:) = RayTraceResult(nRayPupil,nField,nWav,...
                 RayIntersectionPoint,ExitRayPosition,SurfaceNormal,...
-                IncidentRayDirection,IncidenceAngle,ExitRayDirection,ExitAngle,...
-                NoIntersectionPoint,OutOfAperture,TotalInternalReflection,PathLength,OpticalPathLength,...
+                IncidentRayDirection,ExitRayDirection,NoIntersectionPoint,OutOfAperture,TotalInternalReflection,GeometricalPathLength,AdditionalPathLength,OpticalPathLength,...
                 GroupPathLength,TotalPathLength,TotalOpticalPathLength,TotalGroupPathLength,...
                 RefractiveIndex,RefractiveIndexFirstDerivative,RefractiveIndexSecondDerivative,...
                 GroupRefractiveIndex,CoatingJonesMatrix,CoatingPMatrix,CoatingQMatrix,TotalPMatrix,TotalQMatrix);
+%             multipleRayTracerResultAll(startNonDummyIndex,:).RayPupilCoordinates = currentRayPupilCoordinate;
         else
             multipleRayTracerResultFinal(startNonDummyIndex,:) = RayTraceResult(nRayPupil,nField,nWav,...
                 RayIntersectionPoint,ExitRayPosition,SurfaceNormal,...
-                IncidentRayDirection,IncidenceAngle,ExitRayDirection,ExitAngle,...
-                NoIntersectionPoint,OutOfAperture,TotalInternalReflection,PathLength,OpticalPathLength,...
+                IncidentRayDirection,ExitRayDirection,NoIntersectionPoint,OutOfAperture,TotalInternalReflection,GeometricalPathLength,AdditionalPathLength,OpticalPathLength,...
                 GroupPathLength,TotalPathLength,TotalOpticalPathLength,TotalGroupPathLength,...
                 RefractiveIndex,RefractiveIndexFirstDerivative,RefractiveIndexSecondDerivative,...
                 GroupRefractiveIndex,CoatingJonesMatrix,CoatingPMatrix,CoatingQMatrix,TotalPMatrix,TotalQMatrix);
+%             multipleRayTracerResultFinal(startNonDummyIndex,:).RayPupilCoordinates = currentRayPupilCoordinate;
         end
     else
         if recordIntermediateResults
             multipleRayTracerResultAll(startNonDummyIndex,:) = RayTraceResult(nRayPupil,nField,nWav,...
                 RayIntersectionPoint,ExitRayPosition,SurfaceNormal,...
-                IncidentRayDirection,IncidenceAngle,ExitRayDirection,ExitAngle,...
-                NoIntersectionPoint,OutOfAperture,TotalInternalReflection,PathLength,OpticalPathLength,...
+                IncidentRayDirection,ExitRayDirection,NoIntersectionPoint,OutOfAperture,TotalInternalReflection,GeometricalPathLength,AdditionalPathLength,OpticalPathLength,...
                 GroupPathLength,TotalPathLength,TotalOpticalPathLength,TotalGroupPathLength,...
                 RefractiveIndex,RefractiveIndexFirstDerivative,RefractiveIndexSecondDerivative,...
                 GroupRefractiveIndex);
+%              multipleRayTracerResultAll(startNonDummyIndex,:).RayPupilCoordinates = currentRayPupilCoordinate;
         else
             multipleRayTracerResultFinal(startNonDummyIndex,:) = RayTraceResult(nRayPupil,nField,nWav,...
                 RayIntersectionPoint,ExitRayPosition,SurfaceNormal,...
-                IncidentRayDirection,IncidenceAngle,ExitRayDirection,ExitAngle,...
-                NoIntersectionPoint,OutOfAperture,TotalInternalReflection,PathLength,OpticalPathLength,...
+                IncidentRayDirection,ExitRayDirection,NoIntersectionPoint,OutOfAperture,TotalInternalReflection,GeometricalPathLength,AdditionalPathLength,OpticalPathLength,...
                 GroupPathLength,TotalPathLength,TotalOpticalPathLength,TotalGroupPathLength,...
                 RefractiveIndex,RefractiveIndexFirstDerivative,RefractiveIndexSecondDerivative,...
                 GroupRefractiveIndex);
+%              multipleRayTracerResultFinal(startNonDummyIndex,:).RayPupilCoordinates = currentRayPupilCoordinate;
         end
     end
+    
+    
+    
     firstGlass = NonDummySurfaceArray(1).Glass;
-    if computeGroupPathLength
+    
+    % compute refractive indices
+    if computeGroupPathLength || computeGroupIndex
         [groupIndexAfter,indexAfter, firstDerivative_IndexAfter] = getGroupRefractiveIndex(firstGlass,wavlenInM) ;
-    else
-        groupIndexAfter = NaN;
+    elseif computeRefractiveIndexFirstDerivative
+        groupIndexAfter = zeros([1,nRay]);
         indexAfter = getRefractiveIndex(firstGlass,wavlenInM);
-        firstDerivative_IndexAfter = NaN;
+        firstDerivative_IndexAfter = getRefractiveIndex(firstGlass,wavlenInM,1);
+    else
+        groupIndexAfter = zeros([1,nRay]);
+        indexAfter = getRefractiveIndex(firstGlass,wavlenInM);
+        firstDerivative_IndexAfter = zeros([1,nRay]);
     end
+    if computeRefractiveIndexSecondDerivative
+        secondDerivative_IndexAfter = getRefractiveIndex(firstGlass,wavlenInM,2);
+    else
+        secondDerivative_IndexAfter = zeros([1,nRay]);
+    end
+    
+    
+    %     if computeGroupPathLength
+    %         [groupIndexAfter,indexAfter, firstDerivative_IndexAfter] = getGroupRefractiveIndex(firstGlass,wavlenInM) ;
+    %     else
+    %         groupIndexAfter = NaN;
+    %         indexAfter = getRefractiveIndex(firstGlass,wavlenInM);
+    %         firstDerivative_IndexAfter = NaN;
+    %     end
+    
     % To keep track of mirrored coordinates (after mirror occuring odd times)
     mirroredCoordinate = 0;
     
@@ -218,22 +268,44 @@ profile on
         glassAfter = NonDummySurfaceArray(surfaceIndex).Glass;
         
         indexBefore = indexAfter;
-        firstDerivative_IndexBefore = firstDerivative_IndexAfter;
-%         indexAfter = getRefractiveIndex(glassAfter,wavlenInM);
-%         
-%         firstDerivative_IndexAfter = getRefractiveIndex(glassAfter,wavlenInM,1);
-%         secondDerivative_IndexAfter = getRefractiveIndex(glassAfter,wavlenInM,2);
+%         firstDerivative_IndexBefore = firstDerivative_IndexAfter;
+%         secondDerivative_IndexBefore = secondDerivative_IndexAfter;
         groupIndexBefore = groupIndexAfter ;
-%         [groupIndexAfter,indexAfter, firstDerivative_IndexAfter] = getGroupRefractiveIndex(glassAfter,wavlenInM);
-
-    if computeGroupPathLength
-        [groupIndexAfter,indexAfter, firstDerivative_IndexAfter] = getGroupRefractiveIndex(firstGlass,wavlenInM) ;
-    else
-        groupIndexAfter = NaN;
-        indexAfter = getRefractiveIndex(firstGlass,wavlenInM);
-        firstDerivative_IndexAfter = NaN;
-    end        
+        %         indexAfter = getRefractiveIndex(glassAfter,wavlenInM);
+        %
+        %         firstDerivative_IndexAfter = getRefractiveIndex(glassAfter,wavlenInM,1);
+        %         secondDerivative_IndexAfter = getRefractiveIndex(glassAfter,wavlenInM,2);
         
+        %         [groupIndexAfter,indexAfter, firstDerivative_IndexAfter] = getGroupRefractiveIndex(glassAfter,wavlenInM);
+        
+        % compute refractive indices
+        if computeGroupPathLength || computeGroupIndex
+            [groupIndexAfter,indexAfter, firstDerivative_IndexAfter] = getGroupRefractiveIndex(glassAfter,wavlenInM) ;
+        elseif computeRefractiveIndexFirstDerivative
+            groupIndexAfter = zeros([1,nRay]);
+            indexAfter = getRefractiveIndex(glassAfter,wavlenInM);
+            firstDerivative_IndexAfter = getRefractiveIndex(glassAfter,wavlenInM,1);
+        else
+            groupIndexAfter = zeros([1,nRay]);
+            indexAfter = getRefractiveIndex(glassAfter,wavlenInM);
+            firstDerivative_IndexAfter = zeros([1,nRay]);
+        end
+        if computeRefractiveIndexSecondDerivative
+            secondDerivative_IndexAfter = getRefractiveIndex(glassAfter,wavlenInM,2);
+        else
+            secondDerivative_IndexAfter = zeros([1,nRay]);
+        end
+        
+        
+        %
+        %     if computeGroupPathLength
+        %         [groupIndexAfter,indexAfter, firstDerivative_IndexAfter] = getGroupRefractiveIndex(glassAfter,wavlenInM) ;
+        %     else
+        %         groupIndexAfter = NaN;
+        %         indexAfter = getRefractiveIndex(glassAfter,wavlenInM);
+        %         firstDerivative_IndexAfter = NaN;
+        %     end
+        %
         
         rayInitialPosition = CurrentRayPosition;
         rayDirection = CurrentRayDirection;
@@ -250,15 +322,28 @@ profile on
             NonDummySurfaceArray(surfaceIndex),rayInitialPosition,rayDirection,...
             indexBefore,indexAfter,wavlenInM,primaryWavlenInM,reflection);
         
-        OpticalPathLength = indexBefore.*(GeometricalPathLength + additionalPath);
-        GroupPathLength = groupIndexBefore.*(GeometricalPathLength + additionalPath);
+        AdditionalPathLength = additionalPath;
         
         TotalPathLength = TotalPathLength + GeometricalPathLength;
-        TotalOpticalPathLength = TotalOpticalPathLength + OpticalPathLength;
-        TotalGroupPathLength = TotalGroupPathLength + GroupPathLength;
         
-        totalNoIntersection = sum(NoIntersectionPoint);
+        if computeOpticalPathLength
+            OpticalPathLength = indexBefore.*(GeometricalPathLength + additionalPath);
+            TotalOpticalPathLength = TotalOpticalPathLength + OpticalPathLength;
+        else
+            OpticalPathLength = zeros([1,nRay]);
+            TotalOpticalPathLength = zeros([1,nRay]);
+        end
+        
+        if computeGroupPathLength
+            GroupPathLength = groupIndexBefore.*(GeometricalPathLength + additionalPath);
+            TotalGroupPathLength = TotalGroupPathLength + GroupPathLength;
+        else
+            GroupPathLength = zeros([1,nRay]);
+            TotalGroupPathLength = zeros([1,nRay]);
+        end
+
         if dispNoIntersectionStatus
+            totalNoIntersection = sum(NoIntersectionPoint);
             if totalNoIntersection > 0
                 disp([num2str(totalNoIntersection) , ' rays do not intersect surface ',...
                     num2str(surfaceIndex),'. They have no intersection point. They are',...
@@ -299,8 +384,11 @@ profile on
             localSurfaceNormal = -localSurfaceNormal;
         end
         localIncidentRayDirection = CurrentRayDirection;
-        localIncidenceAngle = computeAngleBetweenVectors (localSurfaceNormal,...
-            localIncidentRayDirection); % new function replacing yi's 5th function
+        
+        % localIncidenceAngle = computeAngleBetweenVectors (localSurfaceNormal,...
+        %     localIncidentRayDirection); % new function replacing yi's 5th function
+        % localIncidenceAngle = zeros(1,nRay);
+        
         if surfaceIndex < nNonDummySurface
             if considerPolarization
                 coatingType = NonDummySurfaceArray(surfaceIndex).Coating.Type;
@@ -308,8 +396,11 @@ profile on
             Kqm1 = localIncidentRayDirection;
             
             CurrentRayDirection = localExitRayDirection;
-            localExitAngle = computeAngleBetweenVectors(localSurfaceNormal,...
-                localExitRayDirection);
+            
+            % localExitAngle = computeAngleBetweenVectors(localSurfaceNormal,...
+            %     localExitRayDirection);
+            % localExitAngle = zeros(1,nRay);
+            
             Kq = CurrentRayDirection;
             nTotIR = sum(TIR);
             if dispTIRStatus
@@ -324,8 +415,11 @@ profile on
             wavLenInUm = wavlenInM*10^6;
             if strcmpi(NonDummySurfaceArray(surfaceIndex).Glass.Name,'Mirror')
                 if considerPolarization
+                    localIncidenceAngle = computeAngleBetweenVectors (localSurfaceNormal,...
+                        localIncidentRayDirection);
                     % jones matrix for multiple rays with localIncidenceAngle
                     % Wavelength shall be converted to um
+                    
                     primaryWaveLenInUm = primaryWavlenInM*10^6;
                     [ampRs,ampRp,powRs,powRp,jonesMatrix]=...
                         getReflectionCoefficients(NonDummySurfaceArray(surfaceIndex).Coating,...
@@ -336,8 +430,11 @@ profile on
                 mirroredCoordinate = ~mirroredCoordinate;
             elseif ~strcmpi(NonDummySurfaceArray(surfaceIndex).Glass.Name,'Mirror')
                 if considerPolarization
+                    localIncidenceAngle = computeAngleBetweenVectors (localSurfaceNormal,...
+                        localIncidentRayDirection);
                     % new code
                     % Wavelength shall be converted to um
+                    
                     primaryWaveLenInUm = primaryWavlenInM*10^6;
                     [ampTs,ampTp,powTs,powTp,jonesMatrix] = ...
                         getTransmissionCoefficients(...
@@ -350,6 +447,7 @@ profile on
             RefractiveIndex = indexAfter;
             RefractiveIndexFirstDerivative = firstDerivative_IndexAfter;
             RefractiveIndexSecondDerivative = secondDerivative_IndexAfter;
+            %  RefractiveIndexSecondDerivative = zeros(1,nRay);
             GroupRefractiveIndex = groupIndexAfter;
             
             % compute the new P matrix
@@ -366,8 +464,8 @@ profile on
             end
         elseif surfaceIndex==nNonDummySurface
             % for image surface no refraction
-            localExitRayDirection  = localIncidentRayDirection;
-            localExitAngle = localIncidenceAngle;
+            %             localExitRayDirection  = localIncidentRayDirection;
+            %             localExitAngle = localIncidenceAngle;
             if considerPolarization
                 CoatingJonesMatrix = repmat(eye(2),[1,1,nRay]);
                 CoatingPMatrix = repmat(eye(3),[1,1,nRay]);
@@ -381,8 +479,8 @@ profile on
             localToGlobalCoordinate(localRayIntersectionPoint,localExitRayPosition,...
             localSurfaceNormal,localIncidentRayDirection,localExitRayDirection,surfaceCoordinateTM);
         
-        globalIncidenceAngle = localIncidenceAngle;
-        globalExitAngle = localExitAngle;
+        %         globalIncidenceAngle = localIncidenceAngle;
+        %         globalExitAngle = localExitAngle;
         
         % Add signs to the angles
         % +Ve angles: CCW when observed from (SurfaceNormal X RayDirection)
@@ -390,10 +488,11 @@ profile on
         % -Ve angles: CW when observed from (SurfaceNormal X RayDirection)
         % from direction with -ve x component
         % This makes the angles valid for rays in yz planes with conventional sign convention.
-        normalToPlaneOfPropagationIncident =  ...
-            compute3dCross(GlobalSurfaceNormal,GlobalIncidentRayDirection);
-        normalToPlaneOfPropagationExit =  ...
-            compute3dCross(GlobalSurfaceNormal,GlobalExitRayDirection);
+        % normalToPlaneOfPropagationIncident =  ...
+        %     compute3dCross(GlobalSurfaceNormal,GlobalIncidentRayDirection);
+        %
+        % normalToPlaneOfPropagationExit =  ...
+        %     compute3dCross(GlobalSurfaceNormal,GlobalExitRayDirection);
         
         %     if strcmpi(NonDummySurfaceArray(surfaceIndex).Glass.Name,'Mirror')
         %         % Invert the incidence direction in case of mirrror
@@ -403,28 +502,29 @@ profile on
         %         signOfIncidence = 1;
         %     end
         
-        GlobalIncidenceAngleSigned = globalIncidenceAngle.* ...
-            -sign(normalToPlaneOfPropagationIncident(1));
-        GlobalExitAngleSigned = globalExitAngle.* ...
-            -sign(normalToPlaneOfPropagationExit(1));
+        % GlobalIncidenceAngleSigned = globalIncidenceAngle.* ...
+        %     -sign(normalToPlaneOfPropagationIncident(1));
+        % GlobalIncidenceAngleSigned = globalIncidenceAngle;
+        
+        % GlobalExitAngleSigned = globalExitAngle.* ...
+        %     -sign(normalToPlaneOfPropagationExit(1));
+        % GlobalExitAngleSigned = globalExitAngle;
         
         % Record all neccessary outputs to trace the ray
         if recordIntermediateResults
             if considerPolarization
                 multipleRayTracerResultAll(surfaceIndex,:) = RayTraceResult(nRayPupil,nField,nWav,...
                     GlobalRayIntersectionPoint,GlobalExitRayPosition,GlobalSurfaceNormal,...
-                    GlobalIncidentRayDirection,...
-                    GlobalIncidenceAngleSigned,GlobalExitRayDirection,GlobalExitAngleSigned,...
-                    NoIntersectionPoint,OutOfAperture,TIR,GeometricalPathLength,OpticalPathLength,...
+                    GlobalIncidentRayDirection,GlobalExitRayDirection,...
+                    NoIntersectionPoint,OutOfAperture,TIR,GeometricalPathLength,AdditionalPathLength,OpticalPathLength,...
                     GroupPathLength,TotalPathLength,TotalOpticalPathLength,TotalGroupPathLength,...
                     RefractiveIndex,RefractiveIndexFirstDerivative,RefractiveIndexSecondDerivative,...
                     GroupRefractiveIndex,CoatingJonesMatrix,CoatingPMatrix,CoatingQMatrix,TotalPMatrix,TotalQMatrix);
             else
                 multipleRayTracerResultAll(surfaceIndex,:) = RayTraceResult(nRayPupil,nField,nWav,...
                     GlobalRayIntersectionPoint,GlobalExitRayPosition,GlobalSurfaceNormal,...
-                    GlobalIncidentRayDirection,GlobalIncidenceAngleSigned,...
-                    GlobalExitRayDirection,GlobalExitAngleSigned,NoIntersectionPoint,...
-                    OutOfAperture,TIR,GeometricalPathLength,OpticalPathLength,...
+                    GlobalIncidentRayDirection,GlobalExitRayDirection,NoIntersectionPoint,...
+                    OutOfAperture,TIR,GeometricalPathLength,AdditionalPathLength,OpticalPathLength,...
                     GroupPathLength,TotalPathLength,TotalOpticalPathLength,TotalGroupPathLength,...
                     RefractiveIndex,RefractiveIndexFirstDerivative,RefractiveIndexSecondDerivative,...
                     GroupRefractiveIndex);
@@ -434,17 +534,15 @@ profile on
                 if considerPolarization
                     multipleRayTracerResultFinal(2,:) = RayTraceResult(nRayPupil,nField,nWav,...
                         GlobalRayIntersectionPoint,GlobalExitRayPosition,GlobalSurfaceNormal,GlobalIncidentRayDirection,...
-                        GlobalIncidenceAngleSigned,GlobalExitRayDirection,GlobalExitAngleSigned,...
-                        NoIntersectionPoint,OutOfAperture,TIR,GeometricalPathLength,OpticalPathLength,...
+                        GlobalExitRayDirection,NoIntersectionPoint,OutOfAperture,TIR,GeometricalPathLength,AdditionalPathLength,OpticalPathLength,...
                         GroupPathLength,TotalPathLength,TotalOpticalPathLength,TotalGroupPathLength,...
                         RefractiveIndex,RefractiveIndexFirstDerivative,RefractiveIndexSecondDerivative,...
                         GroupRefractiveIndex,CoatingJonesMatrix,CoatingPMatrix,CoatingQMatrix,TotalPMatrix,TotalQMatrix);
                 else
                     multipleRayTracerResultFinal(2,:) = RayTraceResult(nRayPupil,nField,nWav,...
                         GlobalRayIntersectionPoint,GlobalExitRayPosition,GlobalSurfaceNormal,...
-                        GlobalIncidentRayDirection,GlobalIncidenceAngleSigned,...
-                        GlobalExitRayDirection,GlobalExitAngleSigned,NoIntersectionPoint,...
-                        OutOfAperture,TIR,GeometricalPathLength,OpticalPathLength,...
+                        GlobalIncidentRayDirection,GlobalExitRayDirection,NoIntersectionPoint,...
+                        OutOfAperture,TIR,GeometricalPathLength,AdditionalPathLength,OpticalPathLength,...
                         GroupPathLength,TotalPathLength,TotalOpticalPathLength,TotalGroupPathLength,...
                         RefractiveIndex,RefractiveIndexFirstDerivative,RefractiveIndexSecondDerivative,...
                         GroupRefractiveIndex);
@@ -470,5 +568,5 @@ profile on
     end
     
     rayTracerResultReshaped = rayTracerResult;
-profile viewer
+%     profile viewer
 end

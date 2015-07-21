@@ -2929,7 +2929,7 @@ function BuildChildWindowSettingPanel...
                 'Enable','On');
         elseif strcmpi(wavLengthIndexString,'All')
         else
-            maxWavIndexDefined = currentOpticalSystem.NumberOfWavelengths;
+            maxWavIndexDefined = getNumberOfWavelengths(currentOpticalSystem);
             wavLengthIndex = str2double(wavLengthIndexString);
             if wavLengthIndex > maxWavIndexDefined
                 set(hObject,'Value',maxWavIndexDefined+1);
@@ -2938,7 +2938,7 @@ function BuildChildWindowSettingPanel...
             % write the wavelength on the wavelength text box and disable it
             wavelength = currentOpticalSystem.WavelengthMatrix(wavLengthIndex,1);
             % Convert from wavelengthunit to um
-            wavelength = (wavelength*currentOpticalSystem.getWavelengthUnitFactor)/(10^-6);
+            wavelength = (wavelength*getWavelengthUnitFactor(currentOpticalSystem))/(10^-6);
             set(childHandle.txtWavelength,'String',num2str(wavelength),'Enable','Off');
         end
     end

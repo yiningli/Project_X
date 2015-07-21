@@ -1,10 +1,10 @@
-function [stopIndex, specified] = getStopSurfaceIndex(optSystem)
+function [stopIndex, specified,surfaceArray, nSurface] = getStopSurfaceIndex(optSystem)
     % getStopIndex: gives the stop index surface set by user
     stopIndex = 0;
     specified = 0;
-    nSurf = getNumberOfSurfaces(optSystem);
-    for kk=1:1:nSurf
-        curentSurf = getSurfaceArray(optSystem,kk);
+    [nSurface, surfaceArray ] = getNumberOfSurfaces(optSystem);
+    for kk=1:1:nSurface
+        curentSurf = surfaceArray(kk);
         if curentSurf.Stop
             stopIndex = kk;
             specified = 1;

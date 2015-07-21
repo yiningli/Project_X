@@ -1,4 +1,4 @@
-function EntrancePupilDiameter = getEntrancePupilDiameter(optSystem,wavLen)
+function [EntrancePupilDiameter,EntrancePupilPupilLocation] = getEntrancePupilDiameter(optSystem,wavLen)
     % getEntrancePupilDiameter: returns EP diameter
     
     if nargin < 2
@@ -6,7 +6,7 @@ function EntrancePupilDiameter = getEntrancePupilDiameter(optSystem,wavLen)
     end
     systemApertureType = optSystem.SystemApertureType;
     systemApertureValue = optSystem.SystemApertureValue;
-    entPupilLocation = getEntrancePupilLocation(optSystem);
+    EntrancePupilPupilLocation = getEntrancePupilLocation(optSystem);
     currentSurf = getSurfaceArray(optSystem,1);
     objectRefractiveIndex = getRefractiveIndex(currentSurf.Glass,wavLen);
     if abs(currentSurf.Thickness)>10^10
@@ -15,6 +15,6 @@ function EntrancePupilDiameter = getEntrancePupilDiameter(optSystem,wavLen)
         objThick  = currentSurf.Thickness;
     end
     EntrancePupilDiameter = computeEntrancePupilDiameter...
-        (systemApertureType,systemApertureValue,entPupilLocation, ...
+        (systemApertureType,systemApertureValue,EntrancePupilPupilLocation, ...
         objectRefractiveIndex,objThick);
 end

@@ -34,13 +34,15 @@ numberOfRays = (sampleGridSize)^2;
 samplingType = 'Cartesian';
 
 % polarizedRayTracerResult =  nSurf X nRay X nField X nWav
-considerPolarization = 1;
-recordIntermediateResults = 0;
 endSurface = surfIndex;
-considerSurfAperture = 1;
+
+rayTraceOptionStruct = RayTraceOptionStruct();
+rayTraceOptionStruct.ConsiderSurfAperture = 1;
+rayTraceOptionStruct.ConsiderPolarization = 1;
+rayTraceOptionStruct.RecordIntermediateResults = 0;
+
 [polarizedRayTracerResult,pupilMeshGrid,outsidePupilIndices] = multipleRayTracer(optSystem,wavLen,...
-    fieldPointXY,sampleGridSize,sampleGridSize,samplingType,considerPolarization,...
-        considerSurfAperture,recordIntermediateResults,endSurface);
+    fieldPointXY,sampleGridSize,sampleGridSize,samplingType,rayTraceOptionStruct,endSurface);
 
 
 % Spatial Distribution of diattenuation of the system in pupil coordinate
@@ -55,12 +57,11 @@ Y = pupilMeshGrid(:,:,2);
 for wavIndex = 1:nWav
     for fieldIndex = 1:nField        
         % totalPMatrix = 3 x 3 x nRay matrix of total P matrix
-        totalPMatrix = reshape(...
-            [polarizedRayTracerResult(2,:,fieldIndex,wavIndex).TotalPMatrix],...
-            [3,3,nRay]);
-        totalQMatrix = reshape(...
-            [polarizedRayTracerResult(2,:,fieldIndex,wavIndex).TotalQMatrix],...
-            [3,3,nRay]);        
+         totalPMatrix = squeeze(getAllSurfaceTotalPMatrix(...
+             polarizedRayTracerResult(2),0,fieldIndex,wavIndex));
+         totalQMatrix = squeeze(getAllSurfaceTotalQMatrix(...
+             polarizedRayTracerResult(2),0,fieldIndex,wavIndex));
+         
         % create pannel for each wavelength-field points
         subplotPanel = uipanel('Parent',plotPanelHandle,...
             'Units','Normalized',...

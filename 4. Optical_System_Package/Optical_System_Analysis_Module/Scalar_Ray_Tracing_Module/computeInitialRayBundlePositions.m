@@ -44,7 +44,7 @@ function [ initialRayBundlePositions2 ] = computeInitialRayBundlePositions...
     % field1,field1,field1 . . .(nRay times), field2,field2,field2 . . . .
     pupilSamplingPoints = repmat(pupilSamplingPoints,[1,nField]);    
     
-    allFieldDirectionCosine = cellfun(@(x) repmat(x,[1,nRay]),...
+    allFieldDirectionCosine = cellfun(@(x) x*ones(1,nRay),...
         num2cell(commonRayDirectionCosine,[1]),'UniformOutput',false);
     allRayDirectionCosine = cell2mat(allFieldDirectionCosine);    
        
@@ -58,7 +58,7 @@ function [ initialRayBundlePositions2 ] = computeInitialRayBundlePositions...
         (dx./dz).*(pupilSamplingPoints(3,:)-objZ);
     rayPosY = pupilSamplingPoints(2,:,:) - ...
         (dy./dz).*(pupilSamplingPoints(3,:)-objZ);    
-    rayPosZ = repmat(objZ,[1,nRay*nField]);
+    rayPosZ = objZ*ones(1,nRay*nField); %repmat(objZ,[1,nRay*nField]);
     initialRayBundlePositions = cat(1,rayPosX,rayPosY,rayPosZ);
     
      % compute intersection point of the rays with plane perpendicular

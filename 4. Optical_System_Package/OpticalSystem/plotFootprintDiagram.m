@@ -49,16 +49,18 @@ function plotFootprintDiagram(optSystem,surfIndex,wavLen,...
     cla(axesHandle,'reset')
     
     % polarizedRayTracerResult =  2 X nRay X nField X nWav
-    considerPolarization = 0;
-    considerSurfAperture = 1;
-    recordIntermediateResults = 0;
     endSurface = surfIndex;
+    rayTraceOptionStruct = RayTraceOptionStruct();
+    rayTraceOptionStruct.ConsiderPolarization = 0;
+    rayTraceOptionStruct.ConsiderSurfaceAperture = 1;
+    rayTraceOptionStruct.RecordIntermediateResults = 0;
+    
     polarizedRayTracerResult = multipleRayTracer(optSystem,wavLen,...
-        fieldPointXY,numberOfRays1,numberOfRays2,PupSamplingType,considerPolarization,...
-        considerSurfAperture,recordIntermediateResults,endSurface);
+        fieldPointXY,numberOfRays1,numberOfRays2,PupSamplingType,rayTraceOptionStruct,endSurface);
     
     % Draw the aperture
-    surfAperture = optSystem.getSurfaceArray(surfIndex).Aperture;
+    currentSurface = getSurfaceArray(optSystem,surfIndex);
+    surfAperture = currentSurface.Aperture;
     nPoints1 = 100;
     nPoints2 = 100;
     xyCenterPoint = [0,0];
@@ -68,12 +70,12 @@ function plotFootprintDiagram(optSystem,surfIndex,wavLen,...
     % Spatial Distribution of spot diagram in a given surface
     % Use different color for diffrent wavelengths and different symbal for
     % different field points.
-    entrancePupilRadius = (getEntrancePupilDiameter(optSystem))/2;
+%     entrancePupilRadius = (getEntrancePupilDiameter(optSystem))/2;
     nSurfaceResultRecorded = size(polarizedRayTracerResult,1);
     nRay = size(polarizedRayTracerResult,2);
     nField = size(polarizedRayTracerResult,3);
     nWav = size(polarizedRayTracerResult,4);
-    SurfaceCoordinateTM = optSystem.getSurfaceArray(surfIndex).SurfaceCoordinateTM;
+    SurfaceCoordinateTM = currentSurface.SurfaceCoordinateTM;
     
     surfIndexWithOutDummy = surfIndex-dummySurfacesBeforeCurrentSurface;
     

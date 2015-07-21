@@ -30,7 +30,7 @@ function [refLocalRayDirection,TIR] = computeRefractedRayDirection ...
     % Jan 18,2014   Worku, Norman G.     Vectorized inputs and outputs
     
 	% <<<<<<<<<<<<<<<<<<<<< Main Code Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    try
+%     try
         nRay = size(incidentDirection,2);
 
         % use the 3D snells law from Prof. Gross Script.
@@ -48,23 +48,23 @@ function [refLocalRayDirection,TIR] = computeRefractedRayDirection ...
         totIR = (imag(sum(sp,1))~=0);
         refLocalRayDirection(:,totIR) = NaN ;
         TIR(totIR) = 1;   
-    catch err
-
-         %open file
-         fid = fopen('logFile','a+');
-         % write the error to file
-         % first line: message
-         fprintf(fid,'%s\n',err.message);
-         % following lines: stack
-         for e=1:length(err.stack)
-            fprintf(fid,'%sin %s at %i\n',txt,err.stack(e).name,err.stack(e).line);
-         end
-         % close file
-         fclose(fid)   
-         msgbox(strcat(err.message,' So the function "computeRefractedRayDirection" will return NaN'), 'Program Error','error');
-         refLocalRayDirection = repmat([NaN;NaN;NaN],[1,nRay]); 
-         TIR = NaN([1,nRay]); 
-    end
+%     catch err
+% 
+%          %open file
+%          fid = fopen('logFile','a+');
+%          % write the error to file
+%          % first line: message
+%          fprintf(fid,'%s\n',err.message);
+%          % following lines: stack
+%          for e=1:length(err.stack)
+%             fprintf(fid,'%sin %s at %i\n',txt,err.stack(e).name,err.stack(e).line);
+%          end
+%          % close file
+%          fclose(fid)   
+%          msgbox(strcat(err.message,' So the function "computeRefractedRayDirection" will return NaN'), 'Program Error','error');
+%          refLocalRayDirection = repmat([NaN;NaN;NaN],[1,nRay]); 
+%          TIR = NaN([1,nRay]); 
+%     end
 end
 
 

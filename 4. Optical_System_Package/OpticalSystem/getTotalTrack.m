@@ -4,8 +4,10 @@ function totalTrack = getTotalTrack(optSystem)
     totalThick = 0;
     maxZ = 0;
     minZ = 0;
-    for kk = 2:1:getNumberOfSurfaces(optSystem);
-        surfZ = optSystem.getSurfaceArray(kk).SurfaceCoordinateTM(3,4);
+    [surfaceArray,nSurf] = getSurfaceArray(optSystem);
+    for kk = 2:1:nSurf;
+        currentSurf = surfaceArray(kk);
+        surfZ = currentSurf.SurfaceCoordinateTM(3,4);
         if surfZ > maxZ
             maxZ =  surfZ;
         elseif surfZ < minZ

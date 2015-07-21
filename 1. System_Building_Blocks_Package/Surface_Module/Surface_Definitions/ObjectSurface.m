@@ -158,7 +158,7 @@ function [ returnDataStruct] = ObjectSurface(returnFlag,surfaceParameters,inputD
             m = rayDirection(3,:);
             distanceToXY = -initialPoint(3,:)./m;
             geometricalPathLength = distanceToXY;
-            additionalPathLength = 0;
+            additionalPathLength = zeros(1,size(rayPosition,2));
             
             NoIntersectioPoint = zeros([1,nRay]);
             NoIntersectioPoint(~(isreal(distanceToXY))) = 1;

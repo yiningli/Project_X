@@ -13,25 +13,21 @@ function updatedSurfaceArray = updateSurfaceCoordinateTransformationMatrices(sur
             objThickness = 0;
         end
         % since global coord but shifted by objThickness
-        refCoordinateTM =   [1,0,0,0;
+        refCoordinateTM = ...
+            [1,0,0,0;
             0,1,0,0;
             0,0,1,-objThickness;
             0,0,0,1];
     else
-        refCoordinateTM =   [1,0,0,0;
+        refCoordinateTM = ...
+            [1,0,0,0;
             0,1,0,0;
             0,0,1,0;
             0,0,0,1];
     end
     
-    %     updatedSystem = savedOpticalSystem;
-    %     if ~IsSurfaceBased(savedOpticalSystem)
-    %         return;
-    %     end
-    
     updatedSurfaceArray = surfaceArray;
     nSurface = length(surfaceArray);
-    
     
     surfaceCoordinateTM = refCoordinateTM;
     referenceCoordinateTM = refCoordinateTM;

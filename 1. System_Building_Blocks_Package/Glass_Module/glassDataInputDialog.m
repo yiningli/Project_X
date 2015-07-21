@@ -542,15 +542,13 @@ function mainFigHandle = glassDataInputDialog(glassCatalogueListFullNames,fontNa
         selectedGlassTypeIndex = find(strcmpi(glassType,glassTypeList));
         
         
-        
         parameters = figureHandle.Object.GlassParameters; %
         internalTransmittance = figureHandle.Object.GlassInternalTransmittance;
         thermalData = figureHandle.Object.GlassThermalData;
         wavelengthRange = figureHandle.Object.GlassWavelengthRange;
         resistanceData = figureHandle.Object.GlassResistanceData;
         otherData = figureHandle.Object.GlassOtherData;
-        
-        
+           
         
         set(figureHandle.Object.popGlassType,'Value',selectedGlassTypeIndex);
         set(figureHandle.Object.txtGlassName,'String',glassName);
@@ -589,7 +587,7 @@ function mainFigHandle = glassDataInputDialog(glassCatalogueListFullNames,fontNa
         % Clear the ParametersTab
         delete(get(figureHandle.Object.ParametersTab,'Child'));
         glassParameters = figureHandle.Object.GlassParameters;
-        
+            
         % Handle the zemaxFormula glass types in special case
         if strcmpi(glassType,'ZemaxFormula')
             formulaType = glassParameters.FormulaType;
@@ -629,9 +627,9 @@ function mainFigHandle = glassDataInputDialog(glassCatalogueListFullNames,fontNa
             
             formulaTypeIndex = find(strcmpi(formulaType,zemaxFormulaList));
             
-            figureHandle.Object.popFormulaType = uicontrol( ...
+            figureHandle.Object.popDispersionFormulaType = uicontrol( ...
                 'Parent', figureHandle.Object.ParametersTab, ...
-                'Tag', 'popFormulaType', ...
+                'Tag', 'popDispersionFormulaType', ...
                 'Style', 'popupmenu', ...
                 'fontSize',fontSize,...
                 'FontName',fontName,...
@@ -640,7 +638,8 @@ function mainFigHandle = glassDataInputDialog(glassCatalogueListFullNames,fontNa
                 'Position', [0.50,0.9,0.48,0.055], ...
                 'BackgroundColor', [1 1 1],...
                 'String',zemaxFormulaList,...
-                'Value',formulaTypeIndex);
+                'Value',formulaTypeIndex,...
+                'Callback',{@popDispersionFormulaType_Callback,figureHandle});
             
             % -----------------------------------------------------------------
             
@@ -786,6 +785,22 @@ function mainFigHandle = glassDataInputDialog(glassCatalogueListFullNames,fontNa
             
         end
         makeUneditable(figureHandle);
+    end
+    function popDispersionFormulaType_Callback(hObject,eventdata,figureHandle)
+        % hObject    handle to popDispersionFormulaType (see GCBO)
+        % eventdata  structure with the following fields (see UITABLE)
+        %	Indices: row and column indices of the cell(s) edited
+        %	PreviousData: previous data for the cell(s) edited
+        %	EditData: string(s) entered by the user
+        %	NewData: EditData or its converted form set on the Data property. Empty if Data was not changed
+        %	Error: error string when failed to convert EditData to appropriate value for Data
+        % figureHandle    structure with figureHandle and user data (see GUIDATA)
+        
+        formulaTypeList =  get(figureHandle.Object.popDispersionFormulaType,'String');
+        selectedFormulaType = formulaTypeList{get(hObject,'Value')};
+        figureHandle.Object.GlassParameters.FormulaType = selectedFormulaType;    
+        displayCurrentParameters(figureHandle);
+        makeEditable(figureHandle);
     end
     
     function tblCoefficientData_CellEditCallback(hObject,eventdata,figureHandle)
@@ -1032,10 +1047,21 @@ function mainFigHandle = glassDataInputDialog(glassCatalogueListFullNames,fontNa
     %% ---------------------------------------------------------------------------
     function cmdNewGlass_Callback(hObject,evendata,figureHandle) %#ok<INUSD>
         glassNameCellArray = inputdlg('Enter the new glass name : ','New Glass');
-        glassName = glassNameCellArray{1};
+        if isempty(glassNameCellArray)
+            return;
+        else
+            glassName = glassNameCellArray{1};
+        end
         glassCatalogueFileList = 'All';
-        glassType = 'IdealNonDispersive';
-        
+                glassTypeIndex = listdlg('PromptString','Select the glass type :',...
+            'SelectionMode','single',...
+            'ListString',supportedGlassTypes);
+        if isempty(glassTypeIndex)
+            glassType = 'IdealNonDispersive';
+        else
+            glassType = supportedGlassTypes{glassTypeIndex};
+        end
+                
         newGlass = Glass(glassName,glassCatalogueFileList,glassType);
         
         figureHandle.Object.GlassName = glassName;

@@ -37,13 +37,14 @@ function [ EFL ] = computeEffectiveFocalLength( optSystem )
     if strcmpi(obj_img,'FF') || strcmpi(obj_img,'IF')
         y0 = 0.01;
         u0 = 0;
+        [ nonDummySurfaceArray,nNonDummySurface,nonDummySurfaceIndices,...
+        surfaceArray,nSurface ] = getNonDummySurfaceArray( optSystem );
         initialSurf = 1;
-        finalSurf = getNumberOfSurfaces(optSystem)-1;
+        finalSurf = nSurface-1;
         wavlenInM = getPrimaryWavelength(optSystem);
         [ yf,uf ] = paraxialRayTracer( optSystem,y0,u0,initialSurf,finalSurf,wavlenInM);
         EFL = -y0/uf;
         % In image space
-        nonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
         lastIndex = getRefractiveIndex(nonDummySurfaceArray(finalSurf-1).Glass,wavlenInM);
         EFL = EFL * lastIndex;
     elseif strcmpi(obj_img,'FI') || strcmpi(obj_img,'II')

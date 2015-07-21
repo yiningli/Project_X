@@ -1,4 +1,4 @@
-function NAO = getObjectNA(optSystem,wavLen)
+function [NAO,entPupilLocation] = getObjectNA(optSystem,wavLen)
     % getObjectNA: returns object space NA of the optical system
     
     if nargin < 2
@@ -7,12 +7,12 @@ function NAO = getObjectNA(optSystem,wavLen)
     systemApertureType = optSystem.SystemApertureType;
     systemApertureValue = optSystem.SystemApertureValue;
     entPupilLocation = getEntrancePupilLocation(optSystem);
-    objectRefractiveIndex = optSystem.getSurfaceArray(1)...
-        .Glass.getRefractiveIndex(wavLen);
-    if abs(optSystem.getSurfaceArray(1).Thickness)>10^10
+    objSurf = getSurfaceArray(optSystem,1);
+    objectRefractiveIndex = getRefractiveIndex(objSurf.Glass,wavLen);
+    if abs(objSurf.Thickness)>10^10
         objThick = 10^10;
     else
-        objThick  = optSystem.getSurfaceArray(1).Thickness;
+        objThick  = objSurf.Thickness;
     end
     
     NAO = computeObjectNA...

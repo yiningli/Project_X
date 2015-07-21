@@ -700,14 +700,24 @@ function mainFigHandle = coatingDataInputDialog(referenceWavelength,coatingCatal
     %% ---------------------------------------------------------------------------
     function cmdNewCoating_Callback(hObject,evendata,figureHandle) %#ok<INUSD>
         coatingNameCellArray = inputdlg('Enter the new coating name : ','New Coating');
-        coatingName = coatingNameCellArray{1};
+        if isempty(coatingNameCellArray)
+            return;
+        else
+            coatingName = coatingNameCellArray{1};
+        end
+        
         coatingCatalogueFileList = 'All';
-        coatingType = 'BareGlass';
-        
+        coatingTypeIndex = listdlg('PromptString','Select the coating type :',...
+            'SelectionMode','single',...
+            'ListString',supportedCoatingTypes);
+        if isempty(coatingTypeIndex)
+            coatingType = 'BareGlass';
+        else
+            coatingType = supportedCoatingTypes{coatingTypeIndex};
+        end
         newCoating = Coating(coatingName,coatingCatalogueFileList,coatingType);
-        
+        figureHandle.Object.CoatingType = coatingType;        
         figureHandle.Object.CoatingName = coatingName;
-        figureHandle.Object.CoatingType = coatingType;
         figureHandle.Object.Parameters = newCoating.Parameters;
         
         coatingCatalogueFullName = figureHandle.Object.CoatingCatalogueFullName;

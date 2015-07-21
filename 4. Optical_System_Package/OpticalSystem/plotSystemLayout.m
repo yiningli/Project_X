@@ -30,6 +30,7 @@ function draw = plotSystemLayout( optSystem,rayPathMatrix,...
     
     % <<<<<<<<<<<<<<<<<<<<< Main Code Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     
+
     gratingHeight = 0.2;
     nPoints = 55;
     drawEdge = 1;
@@ -58,6 +59,8 @@ function draw = plotSystemLayout( optSystem,rayPathMatrix,...
         (NonDummySurfaceArray,plotIn2D,nPoints1,nPoints2,...
         axesHandle,drawEdge);
     hold on;
+    
+    
     % Draw rays over the system layout
     if nargin>1 && length(rayPathMatrix)~=1  % NaN is double and its length is 1
         % Use different color for diffrent wavelengths and different line style for
@@ -72,18 +75,14 @@ function draw = plotSystemLayout( optSystem,rayPathMatrix,...
         for wavIndex = 1:nWav
             for fieldIndex = 1:nField
                 lineColor = char(lineColors((fieldIndex-1)*nWav + wavIndex));
-                for rayIndex = 1:nRay
-                    if plotIn2D
-                        plot(axesHandle,rayPathMatrix(3,:,rayIndex,fieldIndex,wavIndex),...
-                            rayPathMatrix(2,:,rayIndex,fieldIndex,wavIndex),...
-                            lineColor); hold on;
-                    else
-                        plot3(axesHandle,...
-                            rayPathMatrix(1,:,rayIndex,fieldIndex,wavIndex),...
-                            rayPathMatrix(3,:,rayIndex,fieldIndex,wavIndex),...
-                            rayPathMatrix(2,:,rayIndex,fieldIndex,wavIndex),...
-                            lineColor); hold on;
-                    end
+                
+                XPointsMatrix = permute(rayPathMatrix(1,:,:,fieldIndex,wavIndex),[2,3,1]);
+                YPointsMatrix = permute(rayPathMatrix(2,:,:,fieldIndex,wavIndex),[2,3,1]);
+                ZPointsMatrix = permute(rayPathMatrix(3,:,:,fieldIndex,wavIndex),[2,3,1]);
+                if plotIn2D
+                    plot(axesHandle,ZPointsMatrix,YPointsMatrix,lineColor); hold on;
+                else
+                    plot3(axesHandle,XPointsMatrix,ZPointsMatrix,YPointsMatrix,lineColor); hold on;
                 end
             end
         end
@@ -114,11 +113,12 @@ function draw = plotSystemLayout( optSystem,rayPathMatrix,...
         grid(axesHandle,'on');
         box(axesHandle,'On')
         hold off;
+%         camlight
+        lighting gouraud
     end
-    camlight
-    lighting gouraud
+    
     axis equal
     draw = 1;
     hold off;
-    
+
 end

@@ -30,13 +30,19 @@ function [ angMag] = computeParaxialAngularMagnification(optSystem)
     
     ystop = 0;
     ustop = 0.01;
-    initialSurf = getStopSurfaceIndex(optSystem);
+     
+    [stopIndex] =  getStopSurfaceIndex(optSystem);
+    initialSurf = stopIndex;
+    [ NonDummySurfaceIndices,surfaceArray,nSurface ] = getNonDummySurfaceIndices( optSystem );
+    nonDummySurfaceArray = surfaceArray(NonDummySurfaceIndices);
+    
     finalSurfObjSide = 1;
-    finalSurfImgSide = getNumberOfSurfaces(optSystem)-1;
+    finalSurfImgSide = nSurface - 1;
+    
     wavlenInM = getPrimaryWavelength(optSystem);
     [ yimg,uimg ] = paraxialRayTracer( optSystem,ystop,ustop,initialSurf,finalSurfImgSide,wavlenInM);
     [ yobj,uobj ] = paraxialRayTracer( optSystem,ystop,ustop,initialSurf,finalSurfObjSide,wavlenInM);
-    nonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
+    
     objSideIndex = getRefractiveIndex(nonDummySurfaceArray(finalSurfObjSide).Glass,wavlenInM);
     imgSideIndex = getRefractiveIndex(nonDummySurfaceArray(finalSurfImgSide).Glass,wavlenInM);
     angMag = (uimg*imgSideIndex)/(uobj*objSideIndex);

@@ -41,15 +41,16 @@ function [ initialRayBundleDirections ] = computeInitialRayBundleDirections...
     
     % Make both matrices of 3X(nRay*nField) matrix to enable simple subtraction
     % field1,field1,field1 . . . field2,field2,field2 . . . .
+    
     pupilSamplingPoints = repmat(pupilSamplingPoints,[1,nField]);    
-    allFieldPosition = cellfun(@(x) repmat(x,[1,nRay]),...
+    allFieldPosition = cellfun(@(x) x*ones(1,nRay),...
         num2cell(fieldPointPosition,[1]),'UniformOutput',false);
     fieldPointPosition = cell2mat(allFieldPosition);
     
     rayDir = pupilSamplingPoints-fieldPointPosition; 
 
     dirMag =  sqrt((sum((rayDir).^2,1)));
-    dirMag = repmat(dirMag,[3,1]);
+    dirMag = ones(3,1)*dirMag;% repmat(dirMag,[3,1]);
     
     % if pupil is to the left of field point, the ray direction should be
     % negated to get real ray.

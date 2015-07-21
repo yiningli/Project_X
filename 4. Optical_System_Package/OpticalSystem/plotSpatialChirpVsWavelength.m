@@ -47,7 +47,7 @@ function [ wavelength_SpatialChirp ] = ...
     spatialChirp = zeros(nPoints,1);
     for k = 1:nPoints
         
-        pilotRay = ScalarRay(pilotRayPosition,pilotRayDirection,wavelengthVectorInM(k)) ;
+        pilotRay = ScalarRayBundle(pilotRayPosition,pilotRayDirection,wavelengthVectorInM(k)) ;
         % Compute Kostenbauder matrix
         finalKostenbauderMatrix = computeKostenbauderMatrix(...
             optSystem,startSurfIndex,startSurfInclusive,...
@@ -56,7 +56,9 @@ function [ wavelength_SpatialChirp ] = ...
     end
     
     wavelength_SpatialChirp = [wavelengthVectorInM spatialChirp];
-    if axesHandle > 0
+    if isnumeric(axesHandle) && axesHandle < 0
+        % No plot
+    else
         plot(axesHandle,wavelengthVectorInM*10^6,spatialChirp);
         grid on;
         xlabel(axesHandle,'Wavelength (um)','FontSize',12);

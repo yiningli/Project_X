@@ -49,23 +49,28 @@ function [ finalKostenbauderMatrix, interfaceKostenbauderMatrices,mediumKostenba
     % Just take the first ray if more than one rays are input
     pilotRay = pilotRay(1);
     
-    % trace the pilot ray
-    considerPolarization = 0;
-    recordIntermediateResults = 1;
-    considerSurfAperture = 1;
-    pilotRayTraceResult = rayTracer(optSystem,pilotRay, considerPolarization,...
-        considerSurfAperture,recordIntermediateResults);
+    % trace the pilot ray    
+    rayTraceOptionStruct = RayTraceOptionStruct();
+    rayTraceOptionStruct.ConsiderSurfAperture = 1;
+    rayTraceOptionStruct.ConsiderPolarization = 0;
+    rayTraceOptionStruct.RecordIntermediateResults = 1;
+    rayTraceOptionStruct.ComputeRefractiveIndexFirstDerivative = 1;
+    rayTraceOptionStruct.ComputeRefractiveIndexSecondDerivative = 1;
+    
+    pilotRayTraceResult = rayTracer(optSystem,pilotRay,rayTraceOptionStruct);
     
     % Get the path lengths after each surface
-    pathLengthFromPrevSurf  = [pilotRayTraceResult.PathLength]*getLensUnitFactor(optSystem);
+    allPathLength = getAllSurfaceGeometricalPathLength(pilotRayTraceResult,0,0,0);
+    pathLengthFromPrevSurf  = allPathLength*getLensUnitFactor(optSystem);
     L = [pathLengthFromPrevSurf,0];
     % Get the angle of incidence and exit rays for each surface
     % Take negative of the angles as the kostenbauder matrix computation
     % assumes the positive angle = CCW when seen from -ve x axis
     % Whereas the ray trace result gives +vw angle for CCW when seen from +ve x
     % axis
-    ang1 = [pilotRayTraceResult.IncidenceAngle];
-    ang2 = [pilotRayTraceResult.ExitAngle];
+    
+    ang1 = getAllSurfaceIncidenceAngle(pilotRayTraceResult,0,0,0);; %[pilotRayTraceResult.IncidenceAngle];
+    ang2 = getAllSurfaceExitAngle(pilotRayTraceResult,0,0,0);;%[pilotRayTraceResult.ExitAngle];
     % Get the refractive indices, 1st and 2nd order derivatev of n with
     % respect to wavelength for medium after each surface
     n = [pilotRayTraceResult.RefractiveIndex];
@@ -76,11 +81,9 @@ function [ finalKostenbauderMatrix, interfaceKostenbauderMatrices,mediumKostenba
     f0 = c/pilotRay.Wavelength;
     % Initialize the ray pulse matrix to identity matrix
     tempK = eye(4);
-    nSurface = optSystem.getNumberOfSurfaces;
-    nNonDummySurface = optSystem.getNumberOfNonDummySurfaces;
-    NonDummySurfaceArray = optSystem.getNonDummySurfaceArray;
-    NonDummySurfaceIndices = optSystem.getNonDummySurfaceIndices;
-    
+    [ NonDummySurfaceArray,nNonDummySurface,NonDummySurfaceIndices,...
+        surfaceArray,nSurface ] = getNonDummySurfaceArray( optSystem );
+  
     startNonDummyIndex = find(NonDummySurfaceIndices>=startSurf);
     startNonDummyIndex = startNonDummyIndex(1);
     endNonDummyIndex = find(NonDummySurfaceIndices<=endSurf);
@@ -97,8 +100,8 @@ function [ finalKostenbauderMatrix, interfaceKostenbauderMatrices,mediumKostenba
             surfaceParameters = NonDummySurfaceArray(surfaceIndex).OtherStandardData;
             switch NonDummySurfaceArray(surfaceIndex).Type
                 case 'Standard'
-                    radius = NonDummySurfaceArray(surfaceIndex).getRadiusOfCurvature*lensUnit;
-                    diffOrder = NonDummySurfaceArray(surfaceIndex).getDiffractionOrder;
+                    radius = getRadiusOfCurvature(NonDummySurfaceArray(surfaceIndex))*lensUnit;
+                    diffOrder = getDiffractionOrder(NonDummySurfaceArray(surfaceIndex));
                     %     diffOrder = -1;
                     if strcmpi(NonDummySurfaceArray(surfaceIndex).Glass.Name,'Mirror')
                         reflection = 1;

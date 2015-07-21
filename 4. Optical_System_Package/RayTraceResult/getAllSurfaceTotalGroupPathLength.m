@@ -28,7 +28,7 @@ function [ totalGroupPathLengths ] = getAllSurfaceTotalGroupPathLength( allSurfa
     end
     
     requestedResultFieldName = 'TotalGroupPathLength';
-    requestedFieldFirstDim = 3;
+    requestedFieldFirstDim = 1;
     totalGroupPathLengths = getRayTraceResultFieldForAllSurfaces( ...
         allSurfaceRayTraceResult,requestedResultFieldName,requestedFieldFirstDim,...
         rayPupilIndices,rayFieldIndices,rayWavelengthIndices);

@@ -64,7 +64,14 @@ function [ returnData1, returnData2, returnData3 ] = IdealDispersive(...
         case 2 % Return the refractive index of given derivative order
             nWav = size(wavelength,2);
             refWavLen = glassParameters.ReferenceWavelength;
-            n = glassParameters.RefractiveIndex;
+            
+            if derivativeOrder == 0
+                n = glassParameters.RefractiveIndex;
+            else
+                % shall be corrected in the future, The 1st derivative of
+                % this model glass shall be computed correctly
+                n = 0;
+            end
             v = glassParameters.AbbeNumber;
             Dpgf = glassParameters.DeltaRelativePartialDispersion;
             

@@ -16,10 +16,13 @@ function [ yf,uf ] = paraxialRayTracer( optSystem,yi,ui,initialSurf,finalSurf,wa
     end
     
     % Determine the start and end indeces in non dummy surface array
-    nSurface = getNumberOfSurfaces(optSystem);
-    nNonDummySurface = getNumberOfNonDummySurfaces(optSystem);
-    NonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
-    NonDummySurfaceIndices = getNonDummySurfaceIndices(optSystem);
+%     nSurface = getNumberOfSurfaces(optSystem);
+%     nNonDummySurface = getNumberOfNonDummySurfaces(optSystem);
+%     nonDummySurfaceArray = getNonDummySurfaceArray(optSystem);
+%     nonDummySurfaceIndices = getNonDummySurfaceIndices(optSystem);
+    
+    [ nonDummySurfaceArray,nNonDummySurface,nonDummySurfaceIndices,...
+        surfaceArray,nSurface ] = getNonDummySurfaceArray(optSystem);
     
     if initialSurf==finalSurf
         yf=yi;
@@ -28,20 +31,20 @@ function [ yf,uf ] = paraxialRayTracer( optSystem,yi,ui,initialSurf,finalSurf,wa
         y = yi;
         u = ui;
         %forward trace
-        indicesAfterStartSurf = find(NonDummySurfaceIndices>=initialSurf);
+        indicesAfterStartSurf = find(nonDummySurfaceIndices>=initialSurf);
         startNonDummyIndex = indicesAfterStartSurf(1);
-        indicesBeforeEndSurf = find(NonDummySurfaceIndices<=finalSurf);
+        indicesBeforeEndSurf = find(nonDummySurfaceIndices<=finalSurf);
         endNonDummyIndex = indicesBeforeEndSurf(end);
         reverseTracing = 0;
         
         for surfIndex = startNonDummyIndex+1:1:endNonDummyIndex
             
-            indexBefore = getRefractiveIndex(NonDummySurfaceArray(surfIndex-1).Glass,wavlenInM);
-            indexAfter = getRefractiveIndex(NonDummySurfaceArray(surfIndex).Glass,wavlenInM);
-            surface = NonDummySurfaceArray(surfIndex);
+            indexBefore = getRefractiveIndex(nonDummySurfaceArray(surfIndex-1).Glass,wavlenInM);
+            indexAfter = getRefractiveIndex(nonDummySurfaceArray(surfIndex).Glass,wavlenInM);
+            surface = nonDummySurfaceArray(surfIndex);
             
             % translate the paraxial ray for next trace
-            t = NonDummySurfaceArray(surfIndex-1).Thickness;
+            t = nonDummySurfaceArray(surfIndex-1).Thickness;
             if t > 10^10
                 t = 10^10;
             end
@@ -73,23 +76,23 @@ function [ yf,uf ] = paraxialRayTracer( optSystem,yi,ui,initialSurf,finalSurf,wa
         y = yi;
         u = -ui;
         %reverse trace
-        indicesAfterEndSurf = find(NonDummySurfaceIndices>=finalSurf);
+        indicesAfterEndSurf = find(nonDummySurfaceIndices>=finalSurf);
         endNonDummyIndex = indicesAfterEndSurf(1);
-        indicesBeforeStartSurf = find(NonDummySurfaceIndices<=initialSurf);
+        indicesBeforeStartSurf = find(nonDummySurfaceIndices<=initialSurf);
         startNonDummyIndex = indicesBeforeStartSurf(end);
         reverseTracing = 1;
         
         for surfIndex = startNonDummyIndex:-1:endNonDummyIndex+1
-            indexBefore = getRefractiveIndex(NonDummySurfaceArray(surfIndex-1).Glass,wavlenInM);
-            indexAfter = getRefractiveIndex(NonDummySurfaceArray(surfIndex).Glass,wavlenInM);
-            surface = NonDummySurfaceArray(surfIndex);
+            indexBefore = getRefractiveIndex(nonDummySurfaceArray(surfIndex-1).Glass,wavlenInM);
+            indexAfter = getRefractiveIndex(nonDummySurfaceArray(surfIndex).Glass,wavlenInM);
+            surface = nonDummySurfaceArray(surfIndex);
             yAfter = y;
             uAfter = u;
             [ yBefore,uBefore ] = traceParaxialRaysToThisSurface(surface,yAfter,uAfter,...
                 indexBefore,indexAfter,reverseTracing,reflection,wavlenInM,referenceWavlenInM);
             
             % translate the paraxial ray to prev surface
-            t = NonDummySurfaceArray(surfIndex-1).Thickness;
+            t = nonDummySurfaceArray(surfIndex-1).Thickness;
             if t > 10^10
                 t = 0;
             end

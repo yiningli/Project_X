@@ -37,14 +37,7 @@ function [ newObjectCatalogueFullName ] = createNewObjectCatalogue(objectType, o
     end
     
     if nargin < 4
-        switch lower(objectType)
-            case 'coating'
-                initialObjectArray = Coating.empty;
-            case 'glass'
-                initialObjectArray = Glass.empty;
-            case 'opticalsystem'
-                initialObjectArray = OpticalSystem.empty;
-        end
+        initialObjectArray = struct('Type',{},'Name',{},'Parameters',{},'ClassName',{});
     end
     if strcmpi(objectCatalogueFullName,'default')
         objectCatalogueFullName = [pwd,'\Catalogue_Files','\New_',objectType,'.mat'];
@@ -83,14 +76,11 @@ function [ newObjectCatalogueFullName ] = createNewObjectCatalogue(objectType, o
         FileInfoStruct =  struct();
         switch lower(objectType)
             case 'coating'
-                ObjectArray = initialObjectArray;
+                ObjectArray = createEmptyCoating();
                 FileInfoStruct.Type = 'Coating';
             case 'glass'
-                ObjectArray = initialObjectArray;
+                ObjectArray = createEmptyGlass();
                 FileInfoStruct.Type = 'Glass';
-            case 'opticalsystem'
-                ObjectArray = initialObjectArray;
-                FileInfoStruct.Type = 'OpticalSystem';
         end
         FileInfoStruct.Date = fix(clock); % Clock = [YYYY MM DD HH MM SS]
         save(objectCatalogueFullName,'ObjectArray','FileInfoStruct');

@@ -308,6 +308,9 @@ function tblSurfaceList_CellEditCallback(~, eventdata,parentWindow)
             selectedSurfaceType = eventdata.NewData;
             newSurface = Surface(selectedSurfaceType);
             % Add the new surfonet to the temporary surfaceArray
+            if aodHandles.OpticalSystem.SurfaceArray(editedRow).Stop
+                newSurface.Stop = 1;
+            end
             aodHandles.OpticalSystem.SurfaceArray(editedRow) = newSurface;
         end
         
@@ -629,7 +632,7 @@ function tblSurfaceBasicParameters_CellEditCallback(~, eventdata,parentWindow)
     aodHandles.OpticalSystem.SurfaceArray(CURRENT_SELECTED_SURFACE) = selectedSurface;
     parentWindow.ParentHandles = aodHandles;
     updateQuickLayoutPanel(parentWindow,CURRENT_SELECTED_SURFACE);
-    updateSurfaceOrComponentEditorPanel( parentWindow );
+    updateSurfaceOrComponentEditorPanel( parentWindow,CURRENT_SELECTED_SURFACE );
 end
 
 function tblSurfaceApertureParameters_CellEditCallback(~, eventdata,parentWindow)
@@ -825,7 +828,7 @@ function InsertNewSurface(parentWindow,surfaceTypeDisp,surfaceType,insertPositio
     % If possible add here a code to select the first cell of newly added row
     % automatically
     parentWindow.ParentHandles = aodHandles;
-    updateSurfaceOrComponentEditorPanel( parentWindow );
+    updateSurfaceOrComponentEditorPanel( parentWindow,insertPosition );
 end
 
 function RemoveSurface(parentWindow,removePosition)
@@ -853,7 +856,7 @@ function RemoveSurface(parentWindow,removePosition)
         CAN_REMOVE_SURFACE = 0;
     end
     parentWindow.ParentHandles = aodHandles;
-    updateSurfaceOrComponentEditorPanel( parentWindow );
+    updateSurfaceOrComponentEditorPanel( parentWindow,removePosition );
 end
 function ret = checkTheCurrentSystemDefinitionType(aodHandles)
     

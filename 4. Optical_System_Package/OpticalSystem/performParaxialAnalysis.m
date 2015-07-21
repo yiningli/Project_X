@@ -4,6 +4,7 @@ function performParaxialAnalysis(optSystem,wavLen,showOptions,textHandle)
     % structure.
     
     % Default variables
+
     if nargin < 1
         disp('Error: The performParaxialAnalysis needs atleat the optical system.');
         return;
@@ -46,45 +47,44 @@ function performParaxialAnalysis(optSystem,wavLen,showOptions,textHandle)
         dispInTextHandle = 1;
     end
     
-    nSurfaces = getNumberOfSurfaces(optSystem);
-    stopIndex = getStopSurfaceIndex(optSystem);
-    effectiveFocalLength = getEffectiveFocalLength(optSystem);
-    totalTrack = getTotalTrack(optSystem);
-    
-    angularMagnification = getAngularMagnification(optSystem,wavLen);
-    objectNA = getObjectNA(optSystem,wavLen);
-    entrancePupilDiameter = getEntrancePupilDiameter(optSystem,wavLen);
-    entrancePupilLocation = getEntrancePupilLocation(optSystem,wavLen);
-    exitPupilLocation = getExitPupilLocation(optSystem,wavLen);
-    exitPupilDiameter = getExitPupilDiameter(optSystem,wavLen);
-    backFocalLength = getBackFocalLength(optSystem,wavLen);
-    imageNA = getImageNA(optSystem,wavLen);
-    
     textResult = char('','<<<<<<<<<< Paraxial Analysis Results >>>>>>>>>>>','');
     if showOptions.TotalNumberOfSurfaces
+        nSurfaces = getNumberOfSurfaces(optSystem);
         textResult = char(textResult,['Number of Surfaces:      ',num2str(nSurfaces)]);
     end
     if showOptions.StopSurfaceIndex
+        stopIndex = getStopSurfaceIndex(optSystem);
         textResult = char(textResult,['Stop Surface Index:      ',num2str(stopIndex)]);
     end
     if showOptions.SystemTotalTrack
+        totalTrack = getTotalTrack(optSystem);
         textResult = char(textResult,['System Total Track:      ',num2str(totalTrack,'%f')]);
     end
     if showOptions.EffectiveFocalLength
+        effectiveFocalLength = getEffectiveFocalLength(optSystem);
         textResult = char(textResult,['Effective Focal Length:  ',num2str(effectiveFocalLength,'%f')]);
     end
     if showOptions.BackFocalLength
+        backFocalLength = getBackFocalLength(optSystem,wavLen);
         textResult = char(textResult,['Back Focal Length:       ',num2str(backFocalLength,'%f')]);
     end
+    
+    [imageNA,exitPupilLocation,exitPupilDiameter,entrancePupilDiameter,...
+        entrancePupilLocation,angularMagnification,paraxialImageDistance] = getImageNA(optSystem,wavLen);
+    objectNA = getObjectNA(optSystem,wavLen);
+    
     if showOptions.AngularMagnification
         textResult = char(textResult,['Angular Magnification:   ',num2str(angularMagnification,'%f')]);
     end
+    
     if showOptions.EntrancePupilDiameter
         textResult = char(textResult,['Entrance Pupil Diameter: ',num2str(entrancePupilDiameter,'%f')]);
     end
     if showOptions.EntrancePupilLocation
         textResult = char(textResult,['Entrance Pupil Location: ',num2str(entrancePupilLocation,'%f')]);
     end
+    
+    
     if showOptions.ExitPupilDiameter
         textResult = char(textResult,['Exit Pupil Diameter:     ',num2str(exitPupilDiameter,'%f')]);
     end
@@ -103,6 +103,5 @@ function performParaxialAnalysis(optSystem,wavLen,showOptions,textHandle)
     else
         disp(textResult);
     end
-    
-    
+
 end

@@ -975,7 +975,7 @@ function menuCoatingDataEditor_Callback(~,~,parentWindow)
         end
         fontSize = aodHandles.FontSize;
         fontName = aodHandles.FontName;
-        primaryWavLenInUm = currentOpticalSystem.getPrimaryWavelength*10^6;
+        primaryWavLenInUm = getPrimaryWavelength(currentOpticalSystem)*10^6;
         coatingDataInputDialog(primaryWavLenInUm,coatingCatalogueListFullNames,fontName,fontSize);
     else
         
@@ -1088,11 +1088,13 @@ end
 
 % ---------------------------------------------------------------------
 function menuLongitudinalRayAberration_Callback(~,~,parentWindow)
-    try
-        testLongitudinalAberration;
-    catch
-        disp('Error: The Longitudinal Ray Aberration function is not defined.');
-    end
+    opticalSystem = parentWindow.ParentHandles.OpticalSystem;
+    [ success ] = plotLongitudinalAberration(opticalSystem);
+%     try
+%         testLongitudinalAberration;
+%     catch
+%         disp('Error: The Longitudinal Ray Aberration function is not defined.');
+%     end
 end
 
 % ---------------------------------------------------------------------

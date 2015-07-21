@@ -48,10 +48,12 @@ function [ chiefRay ] = getChiefRay( optSystem,fieldPointXYInSI,wavLenInM )
         disp('Error: The value of nField and nWav should be equal if both are differnt from 1.');
         return;
     end
-    
-    if abs(optSystem.getSurfaceArray(1).Thickness) > 10^10 % object at infinity
+    firstSurface = getSurfaceArray(optSystem,1);
+    if abs(firstSurface.Thickness) > 10^10 % object at infinity
+        IsObjectAtInfinity = 1;
         objThick = 0;
     else
+        IsObjectAtInfinity = 0;
         objThick  = optSystem.getSurfaceArray(1).Thickness;
     end
     
@@ -64,7 +66,7 @@ function [ chiefRay ] = getChiefRay( optSystem,fieldPointXYInSI,wavLenInM )
             % Global reference is the 1st surface of the lens
             fieldPoint = [fieldPointXYInLensUnit; repmat(-objThick,[1,nField])];
             
-            if abs(optSystem.getSurfaceArray(1).Thickness) > 10^10
+            if IsObjectAtInfinity
                 % Invalid specification
                 disp('Error: Object Height can not be used for objects at infinity');
                 return;
@@ -99,6 +101,6 @@ function [ chiefRay ] = getChiefRay( optSystem,fieldPointXYInSI,wavLenInM )
     
     
     initialPositionInM = initialPosition*getLensUnitFactor(optSystem);
-    chiefRay = ScalarRay(initialPositionInM,initialDirection,wavLenInM);
+    chiefRay = ScalarRayBundle(initialPositionInM,initialDirection,wavLenInM);
 end
 
