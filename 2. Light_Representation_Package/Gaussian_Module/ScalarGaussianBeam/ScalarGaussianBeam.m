@@ -1,9 +1,39 @@
-function NewGaussianBeam = ScalarGaussianBeam(centralRay,...
-        waistRadiusInX,waistRadiusInY,distanceFromWaistInX,distanceFromWaistInY,...
+function NewGaussianBeam = ScalarGaussianBeam(centralRay,waistRadiusInX,...
+        waistRadiusInY,distanceFromWaistInX,distanceFromWaistInY,...
         peakAmplitude,localXDirection,localYDirection)
+    % ScalarGaussianBeam Struct:
+    %
+    %   To represent all scalar (with no polarization) gaussian beam objects
+    %   The class supports constructors to construct an array of gaussian beam
+    %   objects from array of its properties.
+    %
+    % Properties: 7 and methods: 0
+    %
+    % Example Calls:
+    %
+    % newScalarGaussianBeam = ScalarGaussianBeam()
+    %   Returns a default scalar gaussian beam.
+    %
+    % newScalarGaussianBeam = ScalarGaussianBeam(centralRay,waistRadiusInX,...
+    %            waistRadiusInY,distanceFromWaistInX,distanceFromWaistInY,...
+    %            peakAmplitude,localXDirection,localYDirection)
+    %   Returns a scalar gaussian beam with the given properties.
+    
+    % <<<<<<<<<<<<<<<<<<<<<<<<< Author Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    %   Written By: Worku, Norman Girma
+    %   Advisor: Prof. Herbert Gross
+    %	Optical System Design and Simulation Research Group
+    %   Institute of Applied Physics
+    %   Friedrich-Schiller-University of Jena
+    
+    % <<<<<<<<<<<<<<<<<<< Change History Section >>>>>>>>>>>>>>>>>>>>>>>>>>
+    % Date----------Modified By ---------Modification Detail--------Remark
+    % Nov 07,2014   Worku, Norman G.     Original Version
+    
+    
     if nargin == 0
         % Empty constructor
-        NewGaussianBeam.CentralRay = ScalarRay();
+        NewGaussianBeam.CentralRay = ScalarRayBundle();
         NewGaussianBeam.WaistRadiusInX = 0.05; % Default value in lens units
         NewGaussianBeam.WaistRadiusInY = 0.05;
         NewGaussianBeam.DistanceFromWaistInX = 0;

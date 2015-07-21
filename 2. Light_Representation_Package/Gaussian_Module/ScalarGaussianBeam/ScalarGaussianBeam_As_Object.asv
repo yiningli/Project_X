@@ -10,13 +10,38 @@ classdef ScalarGaussianBeam
     % Example Calls:
     %
     % newScalarGaussianBeam = ScalarGaussianBeam()
-    %   Returns a default scalar gaussian beam.
+    %   Returns a default STANDARD plane surface with air afterwards.
     %
-    % newScalarGaussianBeam = ScalarGaussianBeam(centralRay,waistRadiusInX,...
-    %            waistRadiusInY,distanceFromWaistInX,distanceFromWaistInY,...
-    %            peakAmplitude,localXDirection,localYDirection)
-    %   Returns a scalar gaussian beam with the given properties.
+    %     CentralRay          % 1 X N ScalarRay
+    %     WaistRadiusInX      % 1 X N Double
+    %     WaistRadiusInY      % 1 X N Double
+    %     DistanceFromWaistInX   % 1 X N Double
+    %     PeakAmplitude       % 1 X N Double
+    %     LocalXDirection     % 3 X N Double
+    %     LocalYDirection     % 3 X N Double
+    
 
+    
+        % Surface Struct:
+    %
+    %   Defines surfaces of optical interfaces. All surfaces
+    %   types are defined using external functions and this class makes
+    %   calls to the external functions to work with the surfaces.
+    %
+    % Properties: 3 and Methods: 12
+    %
+    % Example Calls:
+    %
+    % newSurface = Surface()
+    %   Returns a default STANDARD plane surface with air afterwards.
+    %
+    
+    % <<<<<<<<<<<<<<<<<<<<<<< Algorithm Section>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    %
+    
+    % <<<<<<<<<<<<<<<<<<<<<<<<< Example Usage>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    %
+    
     % <<<<<<<<<<<<<<<<<<<<<<<<< Author Section >>>>>>>>>>>>>>>>>>>>>>>>>>>>
     %   Written By: Worku, Norman Girma
     %   Advisor: Prof. Herbert Gross
